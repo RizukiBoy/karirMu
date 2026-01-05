@@ -1,0 +1,13 @@
+const COMPANY_DOCUMENT_ENUM = Object.freeze({
+  SK: "SK",
+  AD_ART: "AD_ART",
+  QAIDAH_PPM: "QAIDAH_PPM",
+  NPWP: "NPWP",
+});
+
+const COMPANY_DOCUMENT_VALUES = Object.values(COMPANY_DOCUMENT_ENUM);
+
+module.exports = {
+  COMPANY_DOCUMENT_ENUM,
+  COMPANY_DOCUMENT_VALUES,
+};
