@@ -7,6 +7,7 @@ const { JOB_STATUS_ENUM } = require("../constants/jobStatusEnum");
 
 const users = client.db("karirMu").collection("users");
 const jobs = client.db("karirMu").collection("jobs");
+
 const companies = client
     .db("karirMu")
     .collection("companies");
@@ -279,34 +280,49 @@ exports.getPublicJobs = async (req, res) => {
 exports.getJobsByCompany = async (req, res) => {
   try {
     // =======================
-    // 1️⃣ Ambil company dari token
+    // 1️⃣ Ambil userId dari token
     // =======================
-    const companyId = req.user.company_id;
+    const userId = req.user.userId;
 
-    if (!companyId) {
+    if (!ObjectId.isValid(userId)) {
+      return res.status(401).json({ message: "User tidak valid" });
+    }
+
+    const userObjectId = new ObjectId(userId);
+
+    // =======================
+    // 2️⃣ Ambil user & company_id
+    // =======================
+    const user = await users.findOne(
+      { _id: userObjectId },
+      { projection: { company_id: 1 } }
+    );
+
+    if (!user?.company_id) {
       return res.status(403).json({
-        message: "User tidak terhubung dengan company",
+        message: "User belum terhubung dengan company",
       });
     }
 
-    // =======================
-    // 2️⃣ Ambil query
-    // =======================
-    const {
-      status,
-      search,
-      page = 1,
-      limit = 10,
-    } = req.query;
+    const companyObjectId = new ObjectId(user.company_id);
 
     // =======================
-    // 3️⃣ Filter dasar
+    // 3️⃣ Query params
+    // =======================
+    const { status, search, page = 1, limit = 10 } = req.query;
+
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    // =======================
+    // 4️⃣ Filter
     // =======================
     const filter = {
-      company_id: new ObjectId(companyId),
+      company_id: companyObjectId,
     };
 
-    if (status !== undefined) {
+    if (status === "true" || status === "false") {
       filter.status = status === "true";
     }
 
@@ -318,18 +334,13 @@ exports.getJobsByCompany = async (req, res) => {
     }
 
     // =======================
-    // 4️⃣ Pagination
-    // =======================
-    const skip = (Number(page) - 1) * Number(limit);
-
-    // =======================
-    // 5️⃣ Query data
+    // 5️⃣ Query jobs
     // =======================
     const jobsData = await jobs
       .find(filter)
       .sort({ created_at: -1 })
       .skip(skip)
-      .limit(Number(limit))
+      .limit(limitNum)
       .toArray();
 
     const total = await jobs.countDocuments(filter);
@@ -337,16 +348,16 @@ exports.getJobsByCompany = async (req, res) => {
     // =======================
     // 6️⃣ Response
     // =======================
-    res.json({
-      page: Number(page),
-      limit: Number(limit),
+    return res.json({
+      page: pageNum,
+      limit: limitNum,
       total,
-      total_pages: Math.ceil(total / limit),
+      total_pages: Math.ceil(total / limitNum),
       data: jobsData,
     });
   } catch (error) {
     console.error("ERROR getJobsByCompany:", error);
-    res.status(500).json({
+    return res.status(500).json({
       message: "Gagal mengambil lowongan company",
       error: error.message,
     });
@@ -423,86 +434,87 @@ exports.getJobDetail = async (req, res) => {
   }
 };
 
-exports.updateJob = async (req, res) => {
+
+exports.updateJobAdminAUM = async (req, res) => {
   try {
     // =======================
-    // 1️⃣ Ambil user & jobId
+    // 1️⃣ Authorization
     // =======================
-    const userId = req.user.userId;
-    const companyId = req.user.company_id;
+    if (req.user.role !== "company_hrd") {
+      return res.status(403).json({ message: "Akses ditolak" });
+    }
+
+    // =======================
+    // 2️⃣ Validate jobId
+    // =======================
     const { jobId } = req.params;
 
-    if (!companyId) {
-      return res.status(403).json({
-        message: "User belum terhubung dengan company",
-      });
-    }
-
     if (!ObjectId.isValid(jobId)) {
-      return res.status(400).json({
-        message: "Job ID tidak valid",
-      });
+      return res.status(400).json({ message: "Job ID tidak valid" });
     }
 
-    // =======================
-    // 2️⃣ Ambil job
-    // =======================
-    const job = await jobs.findOne({ _id: new ObjectId(jobId) });
+    const jobObjectId = new ObjectId(jobId);
 
+    // =======================
+    // 3️⃣ Pastikan job ada
+    // =======================
+    const job = await jobs.findOne({ _id: jobObjectId });
     if (!job) {
-      return res.status(404).json({
-        message: "Lowongan tidak ditemukan",
-      });
+      return res.status(404).json({ message: "Lowongan tidak ditemukan" });
     }
 
     // =======================
-    // 3️⃣ Validasi kepemilikan
+    // 4️⃣ Build update data
     // =======================
-    if (job.company_id.toString() !== companyId) {
-      return res.status(403).json({
-        message: "Tidak punya akses ke lowongan ini",
-      });
+    const updateData = {};
+    const allowedFields = [
+      "job_name",
+      "category",
+      "location",
+      "type",
+      "work_type",
+      "description",
+      "requirement",
+      "status",
+    ];
+
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    });
+
+    if (req.body.salary_min !== undefined) {
+      updateData.salary_min = Number(req.body.salary_min);
+    }
+
+    if (req.body.salary_max !== undefined) {
+      updateData.salary_max = Number(req.body.salary_max);
+    }
+
+    if (req.body.date_job !== undefined) {
+      const parsedDate = new Date(req.body.date_job);
+      if (isNaN(parsedDate)) {
+        return res
+          .status(400)
+          .json({ message: "Format date_job tidak valid" });
+      }
+      updateData.date_job = parsedDate;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Tidak ada data yang diperbarui" });
     }
 
     // =======================
-    // 4️⃣ Ambil body
-    // =======================
-    const {
-      category,
-      job_name,
-      location,
-      type,
-      work_type,
-      salary_min,
-      salary_max,
-      description,
-      requirement,
-      date_job,
-      status,
-    } = req.body;
-
-    // =======================
-    // 5️⃣ Validasi ENUM
-    // =======================
-    if (type && !JOB_TYPE_VALUES.includes(type)) {
-      return res.status(400).json({
-        message: "Job type tidak valid",
-      });
-    }
-
-    if (work_type && !WORK_TYPE_VALUES.includes(work_type)) {
-      return res.status(400).json({
-        message: "Work type tidak valid",
-      });
-    }
-
-    // =======================
-    // 6️⃣ Validasi salary
+    // 5️⃣ Business validation
     // =======================
     if (
-      salary_min !== undefined &&
-      salary_max !== undefined &&
-      Number(salary_min) > Number(salary_max)
+      updateData.salary_min !== undefined &&
+      updateData.salary_max !== undefined &&
+      updateData.salary_min > updateData.salary_max
     ) {
       return res.status(400).json({
         message: "salary_min tidak boleh lebih besar dari salary_max",
@@ -510,44 +522,27 @@ exports.updateJob = async (req, res) => {
     }
 
     // =======================
-    // 7️⃣ Siapkan update data
+    // 6️⃣ Update DB
     // =======================
-    const updateData = {
-      updated_at: new Date(),
-      updated_by: new ObjectId(userId),
-    };
+    updateData.updated_at = new Date();
 
-    if (category !== undefined) updateData.category = category;
-    if (job_name !== undefined) updateData.job_name = job_name;
-    if (location !== undefined) updateData.location = location;
-    if (type !== undefined) updateData.type = type;
-    if (work_type !== undefined) updateData.work_type = work_type;
-    if (salary_min !== undefined) updateData.salary_min = Number(salary_min);
-    if (salary_max !== undefined) updateData.salary_max = Number(salary_max);
-    if (description !== undefined) updateData.description = description;
-    if (requirement !== undefined) updateData.requirement = requirement;
-    if (date_job !== undefined) updateData.date_job = new Date(date_job);
-    if (status !== undefined) updateData.status = status;
-
-    // =======================
-    // 8️⃣ Update ke database
-    // =======================
     await jobs.updateOne(
-      { _id: new ObjectId(jobId) },
+      { _id: jobObjectId },
       { $set: updateData }
     );
 
     // =======================
-    // 9️⃣ Response sukses
+    // 7️⃣ Response
     // =======================
-    res.json({
+    return res.json({
       message: "Lowongan berhasil diperbarui",
+      data: updateData,
     });
   } catch (error) {
-    console.error("ERROR updateJob:", error);
-    res.status(500).json({
+    console.error("ERROR updateJobAdminAUM:", error);
+    return res.status(500).json({
       message: "Gagal memperbarui lowongan",
-      error: error.message,
     });
   }
 };
+

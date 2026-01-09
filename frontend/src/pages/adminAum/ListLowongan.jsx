@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import JobCard from "../components/JobCard";
-import JobDetailModal from "../components/JobDetailModal";
-
-const JobList = () => {
+import JobCard from "../../components/JobCard";
+import JobDetailModal from "../../components/JobDetailModal";
+import AdminAumLayout from "../../components/layout/AdminAumLayout";
+const ListLowongan = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState(null);
@@ -12,9 +12,15 @@ const JobList = () => {
     const fetchJobs = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/public/jobs"
+          "http://localhost:5000/api/admin-aum/jobs/", {
+            headers : {
+                  Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            }
+          }
+
         );
 
+        console.log(res.data.data)
         setJobs(res.data.data || []);
       } catch (err) {
         console.error(err);
@@ -28,6 +34,8 @@ const JobList = () => {
 
   return (
     <>
+    <AdminAumLayout>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {jobs.map((job) => (
           <JobCard
@@ -38,8 +46,9 @@ const JobList = () => {
         ))}
       </div>
       <JobDetailModal job={selectedJob} onClose={() => setSelectedJob(null)} />
+    </AdminAumLayout>
     </>
   );
 };
 
-export default JobList;
+export default ListLowongan;

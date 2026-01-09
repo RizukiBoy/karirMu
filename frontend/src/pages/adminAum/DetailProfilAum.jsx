@@ -30,10 +30,13 @@ const DetailProfilAum = () => {
         );
 
         console.log("Backend response:", response.data); 
+        console.log(response.data)
+        console.log(documents)
+
 
         if (response.data.company) {
           setCompany(response.data.company);
-          setDocuments(response.data.data || []);
+          setDocuments(response.data.documents || []);
         } else {
           // Jika belum ada perusahaan, redirect ke ProfilAum untuk input
           // navigate("/admin-aum/profil");
@@ -290,7 +293,7 @@ const DetailProfilAum = () => {
           </div>
 
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  {documents.length ? (
+  {Array.isArray(documents) &&documents.length > 0 ? (
     documents.map((doc, i) => (
       <div
         key={i}

@@ -4,7 +4,8 @@ const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 
 const {
-    createJobs, getJobDetail, getJobsByCompany, getPublicJobs, updateJob
+    createJobs, getJobDetail, getJobsByCompany, getJ, updateJob,
+    updateJobAdminAUM
 } = require("../controllers/jobController");
 const companyMiddleware = require("../middleware/companyMiddleware")
 
@@ -13,12 +14,10 @@ router.post(
   "/jobs", authMiddleware, companyMiddleware, createJobs);
 
 // get
-router.get("/jobs/company",authMiddleware, getJobsByCompany);
-
-router.get("jobs/:id", getJobDetail)
+router.get("/jobs/",authMiddleware, companyMiddleware, getJobsByCompany);
 
 // update
-router.put("/jobs/:jobId", authMiddleware, updateJob);
+router.put("/jobs/:jobId", authMiddleware, companyMiddleware, updateJobAdminAUM);
 
 
 

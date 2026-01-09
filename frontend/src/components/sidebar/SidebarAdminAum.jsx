@@ -118,7 +118,7 @@ const SidebarAdminAum = () => {
             icon={tagsIcon}
             text="Manajemen Lowongan"
             active={isActive("/admin-aum/lowongan")}
-            onClick={() => navigate("/admin-aum/lowongan")}
+            onClick={() => navigate("/admin-aum/list-lowongan")}
           />
 
           <SidebarItem

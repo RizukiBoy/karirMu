@@ -24,9 +24,11 @@ import DataAum from "./components/adminAum/DataAum";
 import DokumenAum from "./components/adminAum/DokumenAum";
 
 // public page
-import JobList from "./public/jobList";
+import JobList from "./public/JobList";
 // Pelamar
 import DashboardPelamar from "./pages/pelamar/DashboardPelamar";
+import ListLowongan from "./pages/adminAum/ListLowongan";
+import Profile from "./pages/pelamar/Profile";
 
 function App() {
   const location = useLocation();
@@ -50,6 +52,8 @@ function App() {
         <Route path="/auth/activate" element={<ActivateAccount />} />
         <Route path="/auth/set-password" element={<SetPassword />} />
 
+        <Route path="/user/profile" element={<Profile />} />
+
         {/* ADMIN AUM (PROTECTED) */}
         <Route element={<ProtectedRoute allowedRole={["company_hrd"]} />}>
           <Route path="/admin-aum/dashboard" element={<DashboardAdminAum />} />
@@ -57,6 +61,7 @@ function App() {
           <Route path="/admin-aum/detail" element={<DetailProfilAum />} />
           <Route path="/admin-aum/data" element={<DataAum />} />
           <Route path="/admin-aum/lowongan" element={<Lowongan />} />
+          <Route path="/admin-aum/list-lowongan" element={<ListLowongan />} />
           <Route path="/admin-aum/dokumen" element={<DokumenAum/>} />
         </Route>
 
