@@ -9,6 +9,7 @@ const {
     getDocumentsByCompany,
     createCompanyProfileWithDocuments,
     validateDocument,
+    updateCompanyProfile,
 } = require("../controllers/companyController");
 
 router.post(
@@ -21,6 +22,14 @@ router.post(
   ]),
   createCompanyProfileWithDocuments
 );
+
+router.put(
+  "/company/edit-profile",
+  authMiddleware, companyMiddleware,
+  upload.fields([{ name: "logo", maxCount: 1 }]),
+  updateCompanyProfile
+);
+
 
 // router.post(
 //   "/company/submit",

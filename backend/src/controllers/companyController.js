@@ -255,6 +255,116 @@ exports.getDocumentsByCompany = async (req, res) => {
   }
 };
 
+exports.updateCompanyProfile = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    // =======================
+    // 0️⃣ Validasi userId
+    // =======================
+    if (!ObjectId.isValid(userId)) {
+      return res.status(401).json({ message: "User tidak valid" });
+    }
+
+    const userObjectId = new ObjectId(userId);
+
+    // =======================
+    // 1️⃣ Ambil user (source of truth)
+    // =======================
+    const user = await users.findOne(
+      { _id: userObjectId },
+      { projection: { company_id: 1 } }
+    );
+
+    if (!user || !user.company_id) {
+      return res.status(404).json({
+        message: "Company belum terdaftar",
+      });
+    }
+
+    const companyId = user.company_id;
+
+    // =======================
+    // 2️⃣ Ambil body
+    // =======================
+    const {
+      company_name,
+      description,
+      address,
+      employee_range,
+      industry,
+      company_email,
+      company_phone,
+      company_url,
+      province,
+      city,
+    } = req.body;
+
+    // =======================
+    // 3️⃣ Validasi minimal
+    // =======================
+    if (!company_name || !company_email || !company_phone) {
+      return res.status(400).json({
+        message: "company_name, company_email, dan company_phone wajib diisi",
+      });
+    }
+
+    // =======================
+    // 4️⃣ Siapkan payload update
+    // =======================
+    const updatePayload = {
+      company_name,
+      description,
+      address,
+      province,
+      city,
+      industry,
+      employee_range: employee_range
+        ? Number(employee_range)
+        : null,
+      company_email,
+      company_phone,
+      company_url,
+      updated_at: new Date(),
+    };
+
+    // =======================
+    // 5️⃣ Jika logo diupload → update logo
+    // =======================
+    if (req.files?.logo?.length) {
+      updatePayload.logo_url = req.files.logo[0].path;
+    }
+
+    // =======================
+    // 6️⃣ Update company
+    // =======================
+    const result = await companies.findOneAndUpdate(
+      { _id: companyId },
+      { $set: updatePayload },
+      { returnDocument: "after" }
+    );
+
+    if (!result.value) {
+      return res.status(404).json({
+        message: "Company tidak ditemukan",
+      });
+    }
+
+    // =======================
+    // 7️⃣ Response
+    // =======================
+    return res.status(200).json({
+      message: "Profil company berhasil diperbarui",
+      company: result.value,
+    });
+  } catch (error) {
+    console.error("ERROR updateCompanyProfile:", error);
+    return res.status(500).json({
+      message: "Gagal memperbarui profil company",
+      error: error.message,
+    });
+  }
+};
 
 exports.ValidateDocument = async (req, res) => {
     try {
