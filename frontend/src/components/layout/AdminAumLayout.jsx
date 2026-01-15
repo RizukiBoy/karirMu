@@ -35,7 +35,7 @@ const AdminAumLayout = ({ children }) => {
         {/* BODY */}
         <div className="flex">
           <SidebarAdminAum open={open} />
-          <main className="flex-1 p-6 bg-gray-50 overflow-y-auto">
+          <main className="flex-1 p-6 bg-gray-50 overflow-y-auto ml-8">
             {children}
           </main>
         </div>

@@ -2,7 +2,6 @@ const express = require("express");
 const {
   register,
   activateAccount,
-  setPassword,
   login,
 } = require("../controllers/authController");
 const authmiddleware = require("../middleware/authMiddleware");
@@ -15,7 +14,6 @@ router.post("/register", register);
 // 🔥 HARUS GET (klik link email)
 router.post("/activate", activateAccount);
 
-router.post("/set-password", setPassword);
 router.post("/login", login);
 
 router.get("/dashboard-user", authmiddleware, (req, res) => {
@@ -227,7 +225,6 @@ router.post("/activate", activateAccount);
  *                   example: Server error
  */
 
-router.post("/set-password", setPassword);
 
 /**
  * @swagger

@@ -63,7 +63,7 @@ const Login = () => {
       if (data.role === "company_hrd") {
         navigate("/admin-aum/dashboard");
       } else if (data.role === "pelamar") {
-        navigate("/pelamar/dashboard");
+        navigate("/user/dashboard");
       } else {
         setError("Role tidak valid");
       }

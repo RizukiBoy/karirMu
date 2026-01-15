@@ -8,7 +8,7 @@ module.exports = async function superAdminMiddleware(email) {
 
   // generate token sekali saat login
   const token = jwt.sign(
-    { admin_id: admin.admin_id, email: admin.email },
+    { admin_id: admin.admin_id, email: admin.email, role: "superadmin" },
     'SECRET_KEY',
     { expiresIn: '1h' }
   );

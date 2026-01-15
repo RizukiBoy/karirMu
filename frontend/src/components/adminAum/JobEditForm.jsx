@@ -1,13 +1,9 @@
-import { useState } from "react"
+import { useEffect, useState } from "react";
 
-export default function JobEditForm({
-  job,
-  onCancel,
-  onSuccess,
-}) {
+export default function JobEditForm({ job, onCancel, onSuccess }) {
   const [form, setForm] = useState({
     job_name: job.job_name || "",
-    category: job.category || "",
+    job_field_id: job.job_field_id || "",
     location: job.location || "",
     type: job.type || "",
     work_type: job.work_type || "",
@@ -16,25 +12,48 @@ export default function JobEditForm({
     description: job.description || "",
     requirement: job.requirement || "",
     status: job.status ?? true,
-  })
+  });
 
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [jobFields, setJobFields] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
+  /* =======================
+     Fetch job fields
+  ======================= */
+  useEffect(() => {
+    const fetchJobFields = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:5000/api/job-field"
+        );
+        const data = await res.json();
+        console.log(res)
+        setJobFields(data.data || []);
+      } catch (err) {
+        console.error("Gagal fetch job fields", err);
+      }
+    };
+
+    fetchJobFields();
+  }, []);
+
+  /* =======================
+     Handlers
+  ======================= */
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
+    const { name, value, type, checked } = e.target;
 
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
-
+    e.preventDefault();
+    setLoading(true);
+    setError("");
     try {
       const res = await fetch(
         `http://localhost:5000/api/admin-aum/jobs/${job._id}`,
@@ -46,24 +65,31 @@ export default function JobEditForm({
           },
           body: JSON.stringify(form),
         }
-      )
+      );
+      console.log(res);
 
-      const result = await res.json()
+      const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.message || "Gagal update lowongan")
+        throw new Error(result.message || "Gagal update lowongan");
       }
 
-      onSuccess(result.data)
+      onSuccess({
+        ...job,
+        ...form,
+      });
     } catch (err) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
+  /* =======================
+     UI
+  ======================= */
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <h3 className="text-lg font-semibold">Edit Lowongan</h3>
 
       {error && (
@@ -79,14 +105,26 @@ export default function JobEditForm({
         required
       />
 
-      <input
-        name="category"
-        value={form.category}
+      {/* JOB FIELD */}
+      <select
+        name="job_field_id"
+        value={form.job_field_id}
         onChange={handleChange}
-        className="input input-bordered w-full"
-        placeholder="Kategori"
+        className="select select-bordered w-full"
         required
-      />
+      >
+        <option value="">Pilih Bidang Pekerjaan</option>
+        {jobFields.length > 0 ? (
+          jobFields.map((field) => (
+            <option key={field._id} value={field._id}>
+              {field.name}
+            </option>
+          ))
+        ) : (
+  <option disabled>Memuat bidang pekerjaan...</option>
+
+      )}
+      </select>
 
       <input
         name="location"
@@ -108,6 +146,7 @@ export default function JobEditForm({
         <option value="full_time">Full Time</option>
         <option value="part_time">Part Time</option>
         <option value="internship">Internship</option>
+        <option value="contract">Contract</option>
         <option value="freelance">Freelance</option>
       </select>
 
@@ -148,8 +187,7 @@ export default function JobEditForm({
         value={form.description}
         onChange={handleChange}
         className="textarea textarea-bordered w-full"
-        placeholder="Deskripsi"
-        required
+        placeholder="Deskripsi Pekerjaan"
       />
 
       <textarea
@@ -157,7 +195,7 @@ export default function JobEditForm({
         value={form.requirement}
         onChange={handleChange}
         className="textarea textarea-bordered w-full"
-        placeholder="Requirement"
+        placeholder="Kualifikasi"
         required
       />
 
@@ -171,7 +209,7 @@ export default function JobEditForm({
         <span>Aktifkan Lowongan</span>
       </label>
 
-      <div className="flex justify-end gap-2 pt-2">
+      <div className="flex justify-end gap-2 pt-3">
         <button
           type="button"
           onClick={onCancel}
@@ -188,5 +226,5 @@ export default function JobEditForm({
         </button>
       </div>
     </form>
-  )
+  );
 }

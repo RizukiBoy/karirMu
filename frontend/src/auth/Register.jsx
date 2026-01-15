@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import RegisterImage from "../assets/img/login1.png";
+import RegisterImage from "../assets/img/auth.png";
 
 const Register = () => {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
-  const [registerAs, setRegisterAs] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -21,10 +22,12 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email || !registerAs) {
-      setMessage("Email dan role wajib dipilih");
-      return;
-    }
+
+  if (!email || !fullName || !password) {
+    setMessage("Semua field wajib diisi");
+    return;
+  }
+
 
     try {
       setLoading(true);
@@ -35,7 +38,9 @@ const Register = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
-          register_as: registerAs,
+          fullName,
+          password,
+          register_as: "pelamar",
         }),
       });
 
@@ -55,11 +60,11 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#C1C7CD] flex items-center justify-center px-6 md:px-16">
+    <div className="min-h-screen bg-[#C1C7CD] flex items-center justify-center px-6 md:px-16 rounded-lg">
       <div className="flex flex-col md:flex-row w-full max-w-360 bg-white rounded-lg overflow-hidden shadow-lg">
 
         {/* IMAGE */}
-        <div className="hidden md:block md:w-150 bg-[#2e2d2d] rounded-tr-[70px] rounded-br-[70px] overflow-hidden">
+        <div className="hidden md:block bg-[#2e2d2d] w-150 rounded-tr-[70px] rounded-br-[70px] overflow-hidden">
           <img
             src={RegisterImage}
             alt="Register"
@@ -81,10 +86,25 @@ const Register = () => {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
+            {/* FULL NAME */}
+            <div className="flex flex-col gap-1">
+              <label className="text-sm text-gray-600">
+                Nama Lengkap
+              </label>
+              <input
+                type="text"
+                placeholder="Masukkan nama lengkap"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="px-4 py-3 bg-gray-100 rounded outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
             {/* EMAIL */}
             <div className="flex flex-col gap-1">
               <label className="text-sm text-gray-600">
-                Masukkan Email
+                Email
               </label>
               <input
                 type="email"
@@ -92,42 +112,23 @@ const Register = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="px-4 py-3 bg-gray-100 rounded outline-none focus:ring-2 focus:ring-blue-500"
+                required
               />
             </div>
 
-            {/* ROLE */}
-            <div className="flex flex-col gap-2">
+            {/* PASSWORD */}
+            <div className="flex flex-col gap-1">
               <label className="text-sm text-gray-600">
-                Daftar sebagai
+                Password
               </label>
-
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setRegisterAs("pelamar")}
-                  className={`border rounded-lg p-3 text-sm font-semibold transition
-                    ${
-                      registerAs === "pelamar"
-                        ? "border-blue-600 bg-blue-50 text-blue-600"
-                        : "border-gray-300 hover:border-blue-400"
-                    }`}
-                >
-                  Pelamar
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setRegisterAs("company_hrd")}
-                  className={`border rounded-lg p-3 text-sm font-semibold transition
-                    ${
-                      registerAs === "company_hrd"
-                        ? "border-blue-600 bg-blue-50 text-blue-600"
-                        : "border-gray-300 hover:border-blue-400"
-                    }`}
-                >
-                  Admin AUM
-                </button>
-              </div>
+              <input
+                type="password"
+                placeholder="Minimal 6 karakter"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="px-4 py-3 bg-gray-100 rounded outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
             </div>
 
             {/* BUTTON */}
@@ -140,6 +141,7 @@ const Register = () => {
             </button>
           </form>
 
+
           <p className="text-sm text-gray-600 text-center">
             Sudah punya akun?{" "}
             <Link
@@ -149,6 +151,17 @@ const Register = () => {
               Login
             </Link>
           </p>
+
+            <p className="text-center text-sm text-gray-600 mt-2">
+            Admin AUM?{" "}
+            <a
+              href="/auth/register-admin-aum"
+              className="text-blue-600 font-semibold hover:underline"
+            >
+              Daftar di sini
+            </a>
+          </p>
+
         </div>
       </div>
     </div>

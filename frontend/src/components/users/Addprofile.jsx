@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-export default function AddProfile({initialData, isEdit}) {
+export default function AddProfile({ initialData, isEdit }) {
   const [form, setForm] = useState({
     headline: "",
     about_me: "",
@@ -10,9 +11,17 @@ export default function AddProfile({initialData, isEdit}) {
     age: "",
     gender: "",
     whatsapp: "",
-    photo: "",
   });
 
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState("");
+  const [loading, setLoading] = useState(false);  
+  
+  const navigate = useNavigate();
+
+  // ======================
+  // Prefill data (Edit)
+  // ======================
   useEffect(() => {
     if (initialData) {
       setForm({
@@ -23,13 +32,17 @@ export default function AddProfile({initialData, isEdit}) {
         age: initialData.age || "",
         gender: initialData.gender || "",
         whatsapp: initialData.whatsapp || "",
-        photo: initialData.photo || "",
       });
+
+      if (initialData.photo?.url) {
+        setPhotoPreview(initialData.photo);
+      }
     }
   }, [initialData]);
 
-  const [loading, setLoading] = useState(false);
-
+  // ======================
+  // Input handler
+  // ======================
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -37,42 +50,89 @@ export default function AddProfile({initialData, isEdit}) {
     });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  await axios.post(
-    "http://localhost:5000/api/user/profile",
-    form,
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      },
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  };
+
+  // ======================
+  // Submit
+  // ======================
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+
+      Object.entries(form).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+
+      if (photoFile) {
+        formData.append("photo", photoFile); // field harus "photo"
+      }
+
+      await axios.post(
+        "http://localhost:5000/api/user/profile",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      alert(isEdit ? "Profil berhasil diperbarui" : "Profil berhasil dibuat");
+      navigate("/user/profile");
+    } catch (error) {
+      alert(error.response?.data?.message || "Terjadi kesalahan");
+    } finally {
+      setLoading(false);
     }
-  );
-
-  alert(isEdit ? "Profile diperbarui" : "Profile dibuat");
-};
-
+  };
 
   return (
     <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow">
-        <h1 className="text-2xl font-semibold mb-6">
+      <h1 className="text-2xl font-semibold mb-6">
         {isEdit ? "Edit Profil" : "Lengkapi Profil Anda"}
-        </h1>
-
+      </h1>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Headline */}
+
+                {/* Photo Upload */}
         <div>
           <label className="block text-sm font-medium mb-1">
-            Headline
+            Foto Profil
           </label>
+
+          {photoPreview && (
+            <img
+              src={photoPreview}
+              alt="Preview"
+              className="w-24 h-24 object-cover rounded-full mb-2"
+            />
+          )}
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoChange}
+            className="w-full border rounded-lg px-4 py-2"
+          />
+        </div>
+        {/* Headline */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Headline</label>
           <input
             type="text"
             name="headline"
             value={form.headline}
             onChange={handleChange}
-            placeholder="Frontend Developer | React Enthusiast"
             className="w-full border rounded-lg px-4 py-2"
             required
           />
@@ -80,24 +140,19 @@ const handleSubmit = async (e) => {
 
         {/* About Me */}
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Tentang Saya
-          </label>
+          <label className="block text-sm font-medium mb-1">Tentang Saya</label>
           <textarea
             name="about_me"
             value={form.about_me}
             onChange={handleChange}
             rows={4}
             className="w-full border rounded-lg px-4 py-2"
-            placeholder="Ceritakan tentang pengalaman dan keahlian Anda"
           />
         </div>
 
         {/* Address */}
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Alamat
-          </label>
+          <label className="block text-sm font-medium mb-1">Alamat</label>
           <textarea
             name="address"
             value={form.address}
@@ -109,25 +164,20 @@ const handleSubmit = async (e) => {
 
         {/* Location */}
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Lokasi
-          </label>
+          <label className="block text-sm font-medium mb-1">Lokasi</label>
           <input
             type="text"
             name="location"
             value={form.location}
             onChange={handleChange}
             className="w-full border rounded-lg px-4 py-2"
-            placeholder="Jakarta, Indonesia"
           />
         </div>
 
         {/* Age & Gender */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Umur
-            </label>
+            <label className="block text-sm font-medium mb-1">Umur</label>
             <input
               type="number"
               name="age"
@@ -138,9 +188,7 @@ const handleSubmit = async (e) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Gender
-            </label>
+            <label className="block text-sm font-medium mb-1">Gender</label>
             <select
               name="gender"
               value={form.gender}
@@ -156,31 +204,13 @@ const handleSubmit = async (e) => {
 
         {/* WhatsApp */}
         <div>
-          <label className="block text-sm font-medium mb-1">
-            WhatsApp
-          </label>
+          <label className="block text-sm font-medium mb-1">WhatsApp</label>
           <input
             type="text"
             name="whatsapp"
             value={form.whatsapp}
             onChange={handleChange}
             className="w-full border rounded-lg px-4 py-2"
-            placeholder="628123456789"
-          />
-        </div>
-
-        {/* Photo */}
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Foto Profil (URL)
-          </label>
-          <input
-            type="text"
-            name="photo"
-            value={form.photo}
-            onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-2"
-            placeholder="https://..."
           />
         </div>
 

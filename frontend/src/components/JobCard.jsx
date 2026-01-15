@@ -1,6 +1,6 @@
-const JobCard = ({ job, onSelect }) => {
+const JobCard = ({ job, onClick }) => {
   return (
-    <div className="bg-white rounded-2xl shadow p-5 flex flex-col justify-between">
+    <div onClick={onClick} className="bg-white rounded-2xl shadow p-5 flex flex-col justify-between">
       <div>
         {/* HEADER */}
         <div className="flex items-center gap-3 mb-4">
@@ -26,12 +26,6 @@ const JobCard = ({ job, onSelect }) => {
       </div>
 
       {/* ACTION */}
-      <button
-        onClick={() => onSelect(job)}
-        className="mt-4 bg-emerald-600 text-white rounded-xl py-2 hover:bg-emerald-700 transition"
-      >
-        Lihat Detail
-      </button>
     </div>
   );
 };

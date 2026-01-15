@@ -201,10 +201,13 @@ exports.getDocumentsByCompany = async (req, res) => {
     });
 
     if (!companyHrdData) {
-      return res.status(404).json({
-        message: "Company HRD tidak ditemukan",
+      return res.status(200).json({
+        message: "Company HRD belum dibuat",
+        company: null,
+        documents: [],
       });
     }
+
 
     const companyId = companyHrdData.company_id;
 
@@ -224,7 +227,6 @@ exports.getDocumentsByCompany = async (req, res) => {
     const company = await companies.findOne({
       _id: companyObjectId,
     });
-
     if (!company) {
       return res.status(404).json({
         message: "Perusahaan tidak ditemukan",
@@ -276,13 +278,20 @@ exports.updateCompanyProfile = async (req, res) => {
       { projection: { company_id: 1 } }
     );
 
-    if (!user || !user.company_id) {
-      return res.status(404).json({
-        message: "Company belum terdaftar",
-      });
-    }
+    if (!ObjectId.isValid(user.company_id)) {
+  return res.status(400).json({ message: "company_id tidak valid" });
+}
 
-    const companyId = user.company_id;
+const companyId = new ObjectId(user.company_id);
+
+
+    // if (!user || !user.company_id) {
+    //   return res.status(404).json({
+    //     message: "Company belum terdaftar",
+    //   });
+    // }
+
+    // const companyId = user.company_id;
 
     // =======================
     // 2️⃣ Ambil body

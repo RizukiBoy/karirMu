@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import JobCard from "../../components/JobCard";
-import JobDetailModal from "../../components/JobDetailModal";
+import JobDetailModal from "../../components/JobDetailPage";
 import AdminAumLayout from "../../components/layout/AdminAumLayout";
+import { useNavigate} from "react-router-dom";
 const ListLowongan = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState(null);
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -41,11 +43,10 @@ const ListLowongan = () => {
           <JobCard
             key={job._id}
             job={job}
-            onSelect={setSelectedJob}
+            onClick={() => navigate(`/jobs/${job._id}`)}
           />
         ))}
       </div>
-      <JobDetailModal job={selectedJob} onClose={() => setSelectedJob(null)} />
     </AdminAumLayout>
     </>
   );

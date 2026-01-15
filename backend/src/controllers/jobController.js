@@ -7,174 +7,168 @@ const { JOB_STATUS_ENUM } = require("../constants/jobStatusEnum");
 
 const users = client.db("karirMu").collection("users");
 const jobs = client.db("karirMu").collection("jobs");
+const companies = client.db("karirMu").collection("companies");
+const jobFields = client.db("karirMu").collection("job_fields")
+const apply_jobs = client.db("karirMu").collection("apply_jobs")
+const user_documents = client.db("karirMu").collection("user_documents");
 
-const companies = client
-    .db("karirMu")
-    .collection("companies");
 
 exports.createJobs = async (req, res) => {
-  try {
-    // =======================
-    // 1️⃣ Ambil & validasi userId
-    // =======================
-    const userId = req.user.userId;
+    try {
+      // =======================
+      // 1️⃣ Validasi user
+      // =======================
+      const userId = req.user.userId;
 
-    if (!ObjectId.isValid(userId)) {
-      return res.status(401).json({ message: "User tidak valid" });
-    }
+      if (!ObjectId.isValid(userId)) {
+        return res.status(401).json({ message: "User tidak valid" });
+      }
 
-    const userObjectId = new ObjectId(userId);
+      const userObjectId = new ObjectId(userId);
 
-    // =======================
-    // 2️⃣ Ambil user dari DB
-    // =======================
-    const user = await users.findOne(
-      { _id: userObjectId },
-      { projection: { company_id: 1 } }
-    );
+      // =======================
+      // 2️⃣ Ambil user & company
+      // =======================
+      const user = await users.findOne(
+        { _id: userObjectId },
+        { projection: { company_id: 1 } }
+      );
 
-    if (!user?.company_id) {
-      return res.status(403).json({
-        message: "User belum terhubung dengan company",
+      if (!user?.company_id) {
+        return res.status(403).json({
+          message: "User belum terhubung dengan company",
+        });
+      }
+
+      const companyObjectId = new ObjectId(user.company_id);
+
+      const company = await companies.findOne({ _id: companyObjectId });
+      if (!company) {
+        return res.status(404).json({
+          message: "Company tidak ditemukan",
+        });
+      }
+
+      // =======================
+      // 3️⃣ Ambil body
+      // =======================
+      const {
+        job_field_id,
+        job_name,
+        location,
+        type,
+        work_type,
+        salary_min,
+        salary_max,
+        description,
+        requirement,
+        date_job,
+        status,
+      } = req.body;
+
+      // =======================
+      // 4️⃣ Validasi wajib
+      // =======================
+      if (
+        !job_field_id ||
+        !job_name ||
+        !location ||
+        !type ||
+        !work_type ||
+        !description ||
+        !requirement
+      ) {
+        return res.status(400).json({
+          message: "Field wajib tidak boleh kosong",
+        });
+      }
+
+      // =======================
+      // 5️⃣ Validasi job field
+      // =======================
+      if (!ObjectId.isValid(job_field_id)) {
+        return res.status(400).json({
+          message: "Job field tidak valid",
+        });
+      }
+
+      const jobFieldObjectId = new ObjectId(job_field_id);
+
+      const jobField = await jobFields.findOne({
+        _id: jobFieldObjectId,
+      });
+
+      if (!jobField) {
+        return res.status(400).json({
+          message: "Job field tidak ditemukan",
+        });
+      }
+
+      // =======================
+      // 6️⃣ Validasi salary
+      // =======================
+      if (
+        salary_min !== undefined &&
+        salary_max !== undefined &&
+        Number(salary_min) > Number(salary_max)
+      ) {
+        return res.status(400).json({
+          message: "salary_min tidak boleh lebih besar dari salary_max",
+        });
+      }
+
+      // =======================
+      // 7️⃣ Validasi date
+      // =======================
+      const parsedDate = date_job ? new Date(date_job) : new Date();
+      if (isNaN(parsedDate)) {
+        return res.status(400).json({
+          message: "Format date_job tidak valid",
+        });
+      }
+
+      // =======================
+      // 8️⃣ Simpan job
+      // =======================
+      const newJob = {
+        company_id: companyObjectId,
+        job_field_id: jobFieldObjectId,
+        job_name: job_name.trim(),
+        location: location.trim(),
+        type,
+        work_type,
+        salary_min: salary_min !== undefined ? Number(salary_min) : null,
+        salary_max: salary_max !== undefined ? Number(salary_max) : null,
+        description,
+        requirement,
+        date_job: parsedDate,
+        status: typeof status === "boolean" ? status : true,
+        created_by: userObjectId,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      await jobs.insertOne(newJob);
+
+      return res.status(201).json({
+        message: "Lowongan berhasil dibuat",
+        data: newJob,
+      });
+    } catch (error) {
+      console.error("ERROR createJobs:", error);
+      return res.status(500).json({
+        message: "Gagal membuat lowongan",
+        error: error.message,
       });
     }
-
-    const companyObjectId = new ObjectId(user.company_id);
-
-    // =======================
-    // 3️⃣ Pastikan company ada
-    // =======================
-    const company = await companies.findOne({ _id: companyObjectId });
-    if (!company) {
-      return res.status(404).json({
-        message: "Company tidak ditemukan",
-      });
-    }
-
-    // =======================
-    // 4️⃣ Ambil body
-    // =======================
-    const {
-      category,
-      job_name,
-      location,
-      type,
-      work_type,
-      salary_min,
-      salary_max,
-      description,
-      requirement,
-      date_job,
-      status,
-    } = req.body;
-
-    // =======================
-    // 5️⃣ Validasi wajib
-    // =======================
-    if (
-      !category ||
-      !job_name ||
-      !location ||
-      !type ||
-      !work_type ||
-      !description ||
-      !requirement
-    ) {
-      return res.status(400).json({
-        message: "Field wajib tidak boleh kosong",
-      });
-    }
-
-    // =======================
-    // 6️⃣ Validasi ENUM
-    // =======================
-    if (!JOB_TYPE_VALUES.includes(type)) {
-      return res.status(400).json({
-        message: "Job type tidak valid",
-      });
-    }
-
-    if (!WORK_TYPE_VALUES.includes(work_type)) {
-      return res.status(400).json({
-        message: "Work type tidak valid",
-      });
-    }
-
-    // =======================
-    // 7️⃣ Validasi salary
-    // =======================
-    if (
-      salary_min !== undefined &&
-      salary_max !== undefined &&
-      Number(salary_min) > Number(salary_max)
-    ) {
-      return res.status(400).json({
-        message: "salary_min tidak boleh lebih besar dari salary_max",
-      });
-    }
-
-    // =======================
-    // 8️⃣ Validasi date
-    // =======================
-    const parsedDate = date_job ? new Date(date_job) : new Date();
-    if (isNaN(parsedDate)) {
-      return res.status(400).json({
-        message: "Format date_job tidak valid",
-      });
-    }
-
-    console.log("BODY:", req.body);
-
-
-    // =======================
-    // 9️⃣ Siapkan data job
-    // =======================
-    const newJob = {
-      company_id: companyObjectId,
-      category: String(category).trim(),
-      job_name: String(job_name).trim(),
-      location: String(location).trim(),
-      type,
-      work_type,
-      salary_min:
-        salary_min !== undefined ? Number(salary_min) : null,
-      salary_max:
-        salary_max !== undefined ? Number(salary_max) : null,
-      description,
-      requirement,
-      date_job: parsedDate,
-      status:
-        typeof status === "boolean"
-          ? status
-          : JOB_STATUS_ENUM.ACTIVE,
-      created_at: new Date(),
-      updated_at: new Date(),
-      created_by: userObjectId,
-    };
-
-    // =======================
-    // 🔟 Insert ke DB
-    // =======================
-    await jobs.insertOne(newJob);
-
-    return res.status(201).json({
-      message: "Lowongan berhasil dibuat",
-      data: newJob,
-    });
-  } catch (error) {
-    console.error("ERROR createJobs:", error);
-    return res.status(500).json({
-      message: "Gagal membuat lowongan",
-      error: error.message,
-    });
-  }
 };
+
 
 exports.getPublicJobs = async (req, res) => {
   try {
     const {
       search,
-      category,
+      job_field,
       location,
       type,
       work_type,
@@ -184,19 +178,20 @@ exports.getPublicJobs = async (req, res) => {
 
     const pageNum = Number(page);
     const limitNum = Number(limit);
+    const skip = (pageNum - 1) * limitNum;
 
     // =======================
     // FILTER DASAR
     // =======================
     const filter = {
-      status: true, // konsisten dengan createJobs (job aktif)
+      status: true, // hanya job aktif
     };
 
     // =======================
     // FILTER DINAMIS
     // =======================
-    if (category) {
-      filter.category = new RegExp(`^${category}$`, "i");
+    if (job_field) {
+      filter.job_field = job_field; // ObjectId string
     }
 
     if (location) {
@@ -219,13 +214,13 @@ exports.getPublicJobs = async (req, res) => {
       ];
     }
 
-    const skip = (pageNum - 1) * limitNum;
-
     // =======================
-    // AGGREGATION
+    // AGGREGATION PIPELINE
     // =======================
     const pipeline = [
       { $match: filter },
+
+      // JOIN COMPANY
       {
         $lookup: {
           from: "companies",
@@ -235,10 +230,27 @@ exports.getPublicJobs = async (req, res) => {
         },
       },
       { $unwind: "$company" },
+
+      // JOIN JOB FIELD
+      {
+        $lookup: {
+          from: "job_fields",
+          localField: "job_field",
+          foreignField: "_id",
+          as: "job_field",
+        },
+      },
+      {
+        $unwind: {
+          path: "$job_field",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      // RESPONSE SHAPE
       {
         $project: {
           job_name: 1,
-          category: 1,
           location: 1,
           type: 1,
           work_type: 1,
@@ -246,36 +258,44 @@ exports.getPublicJobs = async (req, res) => {
           salary_max: 1,
           description: 1,
           requirement: 1,
-          date_job: 1,
           created_at: 1,
-          "company._id": 1,
-          "company.company_name": 1,
-          "company.logo_url": 1,
+
+          company: {
+            _id: "$company._id",
+            company_name: "$company.company_name",
+            logo_url: "$company.logo_url",
+          },
+
+          job_field: {
+            _id: "$job_field._id",
+            name: "$job_field.name",
+          },
         },
       },
+
       { $sort: { created_at: -1 } },
       { $skip: skip },
       { $limit: limitNum },
     ];
 
-    const jobsData = await jobs.aggregate(pipeline).toArray();
+    const data = await jobs.aggregate(pipeline).toArray();
     const total = await jobs.countDocuments(filter);
 
-    return res.json({
+    return res.status(200).json({
       page: pageNum,
       limit: limitNum,
       total,
       total_pages: Math.ceil(total / limitNum),
-      data: jobsData,
+      data,
     });
   } catch (error) {
     console.error("ERROR getPublicJobs:", error);
     return res.status(500).json({
       message: "Gagal mengambil data lowongan",
-      error: error.message,
     });
   }
 };
+
 
 exports.getJobsByCompany = async (req, res) => {
   try {
@@ -364,72 +384,196 @@ exports.getJobsByCompany = async (req, res) => {
   }
 };
 
+// exports.getJobDetail = async (req, res) => {
+//   try {
+//     // =======================
+//     // 1️⃣ Ambil jobId
+//     // =======================
+//     const { id } = req.params;
+
+//     if (!ObjectId.isValid(id)) {
+//       return res.status(400).json({
+//         message: "Job ID tidak valid",
+//       });
+//     }
+
+//     const jobId = new ObjectId(id);
+
+//     // =======================
+//     // 2️⃣ Ambil job + join
+//     // =======================
+//     const pipeline = [
+//       { $match: { _id: jobId } },
+
+//       // join job_fields
+//       {
+//         $lookup: {
+//           from: "job_fields",
+//           localField: "job_field_id",
+//           foreignField: "_id",
+//           as: "job_field",
+//         },
+//       },
+//       {
+//         $unwind: {
+//           path: "$job_field",
+//           preserveNullAndEmptyArrays: true,
+//         },
+//       },
+
+//       // join companies
+//       {
+//         $lookup: {
+//           from: "companies",
+//           localField: "company_id",
+//           foreignField: "_id",
+//           as: "company",
+//         },
+//       },
+//       {
+//         $unwind: {
+//           path: "$company",
+//           preserveNullAndEmptyArrays: true,
+//         },
+//       },
+
+//       // projection rapi
+//       {
+//         $project: {
+//           job_name: 1,
+//           location: 1,
+//           type: 1,
+//           work_type: 1,
+//           salary_min: 1,
+//           salary_max: 1,
+//           requirement: 1,
+//           date_job: 1,
+//           status: 1,
+//           created_at: 1,
+
+//           job_field: {
+//             _id: "$job_field._id",
+//             name: "$job_field.name",
+//           },
+
+//           company: {
+//             company_name: "$company.company_name",
+//             logo_url: "$company.logo_url",
+//             city: "$company.city",
+//             province: "$company.province",
+//             industry: "$company.industry",
+//           },
+//         },
+//       },
+//     ];
+
+//     const job = await jobs.aggregate(pipeline).next();
+
+//     if (!job) {
+//       return res.status(404).json({
+//         message: "Lowongan tidak ditemukan",
+//       });
+//     }
+
+//     // =======================
+//     // 3️⃣ Cek akses job nonaktif
+//     // =======================
+//     if (
+//       job.status === false &&
+//       (!req.user ||
+//         req.user.company_id !== job.company?._id?.toString())
+//     ) {
+//       return res.status(403).json({
+//         message: "Lowongan sudah tidak aktif",
+//       });
+//     }
+
+//     // =======================
+//     // 4️⃣ Response
+//     // =======================
+//     return res.json({
+//       message: "Detail lowongan",
+//       data: job,
+//     });
+//   } catch (error) {
+//     console.error("ERROR getJobDetail:", error);
+//     return res.status(500).json({
+//       message: "Gagal mengambil detail lowongan",
+//       error: error.message,
+//     });
+//   }
+// };
+
 exports.getJobDetail = async (req, res) => {
   try {
-    // =======================
-    // 1️⃣ Ambil jobId dari params
-    // =======================
-    const { id } = req.params;
+    const { jobId } = req.params;
 
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({
-        message: "Job ID tidak valid",
-      });
+    if (!ObjectId.isValid(jobId)) {
+      return res.status(400).json({ message: "Job ID tidak valid" });
     }
 
-    const jobId = new ObjectId(id);
+    const jobObjectId = new ObjectId(jobId);
 
-    // =======================
-    // 2️⃣ Ambil job
-    // =======================
-    const job = await jobs.findOne({ _id: jobId });
+    const job = await jobs.aggregate([
+      { $match: { _id: jobObjectId } },
+      {
+        $lookup: {
+          from: "job_fields",
+          localField: "job_field_id",
+          foreignField: "_id",
+          as: "job_field",
+        },
+      },
+      { $unwind: { path: "$job_field", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "companies",
+          localField: "company_id",
+          foreignField: "_id",
+          as: "company",
+        },
+      },
+      { $unwind: { path: "$company", preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          job_name: 1,
+          location: 1,
+          type: 1,
+          work_type: 1,
+          salary_min: 1,
+          salary_max: 1,
+          requirement: 1,
+          date_job: 1,
+          status: 1,
+          created_at: 1,
+          job_field: {
+            _id: "$job_field._id",
+            name: "$job_field.name",
+          },
+          company: {
+            _id: "$company._id",
+            company_name: "$company.company_name",
+            logo_url: "$company.logo_url",
+            city: "$company.city",
+            province: "$company.province",
+            industry: "$company.industry",
+          },
+        },
+      },
+    ]).next();
 
     if (!job) {
-      return res.status(404).json({
-        message: "Lowongan tidak ditemukan",
-      });
+      return res.status(404).json({ message: "Lowongan tidak ditemukan" });
     }
 
-    // =======================
-    // 3️⃣ Jika job nonaktif → public tidak boleh lihat
-    // =======================
-    if (
-      job.status === false &&
-      (!req.user || req.user.company_id !== job.company_id.toString())
-    ) {
-      return res.status(403).json({
-        message: "Lowongan sudah tidak aktif",
-      });
-    }
-
-    // =======================
-    // 4️⃣ Ambil company
-    // =======================
-    const company = await companies.findOne(
-      { _id: job.company_id },
-      {
-        projection: {
-          company_name: 1,
-          logo_url: 1,
-          city: 1,
-          province: 1,
-          industry: 1,
-        },
-      }
-    );
-
-    // =======================
-    // 5️⃣ Response
-    // =======================
-    res.json({
-      ...job,
-      company,
+    return res.json({
+      message: "Detail lowongan",
+      data: job,
     });
   } catch (error) {
     console.error("ERROR getJobDetail:", error);
-    res.status(500).json({
+    return res.status(500).json({
       message: "Gagal mengambil detail lowongan",
-      error: error.message,
     });
   }
 };
@@ -467,13 +611,14 @@ exports.updateJobAdminAUM = async (req, res) => {
     // 4️⃣ Build update data
     // =======================
     const updateData = {};
+
     const allowedFields = [
       "job_name",
-      "category",
+      "job_field_id",
       "location",
       "type",
       "work_type",
-      "description",
+      "description",   // ✅ KEMBALI
       "requirement",
       "status",
     ];
@@ -484,6 +629,32 @@ exports.updateJobAdminAUM = async (req, res) => {
       }
     });
 
+    // =======================
+    // 5️⃣ job_field_id validation
+    // =======================
+    if (updateData.job_field_id) {
+      if (!ObjectId.isValid(updateData.job_field_id)) {
+        return res.status(400).json({
+          message: "job_field_id tidak valid",
+        });
+      }
+
+      const jobField = await jobFields.findOne({
+        _id: new ObjectId(updateData.job_field_id),
+      });
+
+      if (!jobField) {
+        return res.status(404).json({
+          message: "Job field tidak ditemukan",
+        });
+      }
+
+      updateData.job_field_id = new ObjectId(updateData.job_field_id);
+    }
+
+    // =======================
+    // 6️⃣ Salary validation
+    // =======================
     if (req.body.salary_min !== undefined) {
       updateData.salary_min = Number(req.body.salary_min);
     }
@@ -492,25 +663,6 @@ exports.updateJobAdminAUM = async (req, res) => {
       updateData.salary_max = Number(req.body.salary_max);
     }
 
-    if (req.body.date_job !== undefined) {
-      const parsedDate = new Date(req.body.date_job);
-      if (isNaN(parsedDate)) {
-        return res
-          .status(400)
-          .json({ message: "Format date_job tidak valid" });
-      }
-      updateData.date_job = parsedDate;
-    }
-
-    if (Object.keys(updateData).length === 0) {
-      return res
-        .status(400)
-        .json({ message: "Tidak ada data yang diperbarui" });
-    }
-
-    // =======================
-    // 5️⃣ Business validation
-    // =======================
     if (
       updateData.salary_min !== undefined &&
       updateData.salary_max !== undefined &&
@@ -522,7 +674,26 @@ exports.updateJobAdminAUM = async (req, res) => {
     }
 
     // =======================
-    // 6️⃣ Update DB
+    // 7️⃣ date_job validation
+    // =======================
+    if (req.body.date_job !== undefined) {
+      const parsedDate = new Date(req.body.date_job);
+      if (isNaN(parsedDate)) {
+        return res.status(400).json({
+          message: "Format date_job tidak valid",
+        });
+      }
+      updateData.date_job = parsedDate;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        message: "Tidak ada data yang diperbarui",
+      });
+    }
+
+    // =======================
+    // 8️⃣ Update DB
     // =======================
     updateData.updated_at = new Date();
 
@@ -532,7 +703,7 @@ exports.updateJobAdminAUM = async (req, res) => {
     );
 
     // =======================
-    // 7️⃣ Response
+    // 9️⃣ Response
     // =======================
     return res.json({
       message: "Lowongan berhasil diperbarui",
@@ -542,7 +713,175 @@ exports.updateJobAdminAUM = async (req, res) => {
     console.error("ERROR updateJobAdminAUM:", error);
     return res.status(500).json({
       message: "Gagal memperbarui lowongan",
+      error: error.message,
     });
   }
 };
+
+exports.applyJob = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { jobId } = req.params;
+
+    // =======================
+    // 1️⃣ Validasi jobId
+    // =======================
+    if (!ObjectId.isValid(jobId)) {
+      return res.status(400).json({ message: "Job ID tidak valid" });
+    }
+
+    // =======================
+    // 2️⃣ Ambil CV dari user_documents
+    // =======================
+    const userDocument = await user_documents.findOne({
+      user_id: new ObjectId(userId),
+    });
+
+    if (!userDocument || !userDocument.resume_cv) {
+      return res.status(400).json({
+        message: "Anda harus mengunggah CV sebelum melamar pekerjaan",
+      });
+    }
+
+    // =======================
+    // 3️⃣ Cek sudah pernah apply?
+    // =======================
+    const existingApply = await apply_jobs.findOne({
+      user_id: new ObjectId(userId),
+      job_id: new ObjectId(jobId),
+    });
+
+    if (existingApply) {
+      return res.status(409).json({
+        message: "Anda sudah melamar lowongan ini",
+      });
+    }
+
+    // =======================
+    // 4️⃣ Simpan lamaran
+    // =======================
+    const payload = {
+      user_id: new ObjectId(userId),
+      job_id: new ObjectId(jobId),
+      cv_url: userDocument.resume_cv,
+      apply_status: "submitted",
+      apply_date: new Date(),
+      updated_at: new Date(),
+      hrd_notes: null,
+    };
+
+    await apply_jobs.insertOne(payload);
+
+    return res.status(201).json({
+      message: "Lamaran berhasil dikirim",
+    });
+  } catch (error) {
+    console.error("ERROR applyJob:", error);
+    return res.status(500).json({
+      message: "Gagal melamar pekerjaan",
+    });
+  }
+};
+
+exports.getApplyJobsForCompany = async (req, res) => {
+  try {
+    // =======================
+    // 1️⃣ VALIDASI USER
+    // =======================
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const { userId, role } = req.user;
+
+    if (role !== "company_hrd") {
+      return res.status(403).json({ message: "Akses ditolak" });
+    }
+
+    if (!ObjectId.isValid(userId)) {
+      return res.status(401).json({ message: "User tidak valid" });
+    }
+
+    const user = await users.findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { company_id: 1 } }
+    );
+
+    if (!user || !user.company_id) {
+      return res.status(403).json({ message: "Company tidak ditemukan" });
+    }
+
+    const companyId = user.company_id;
+
+    // =======================
+    // 2️⃣ AGGREGATION (BENAR)
+    // =======================
+    const pipeline = [
+      // join ke jobs
+      {
+        $lookup: {
+          from: "jobs",
+          localField: "job_id",
+          foreignField: "_id",
+          as: "job",
+        },
+      },
+      { $unwind: "$job" },
+
+      // filter by company
+      {
+        $match: {
+          "job.company_id": companyId,
+        },
+      },
+
+      // join ke users (pelamar)
+      {
+        $lookup: {
+          from: "users",
+          localField: "user_id",
+          foreignField: "_id",
+          as: "applicant",
+        },
+      },
+      { $unwind: "$applicant" },
+
+      // response shape
+      {
+        $project: {
+          apply_status: 1,
+          apply_date: 1,
+          updated_at: 1,
+          cv_url: 1,
+          hrd_notes: 1,
+
+          "job._id": 1,
+          "job.job_name": 1,
+          "job.location": 1,
+          "job.type": 1,
+          "job.work_type": 1,
+
+          "applicant._id": 1,
+          "applicant.email": 1,
+          "applicant.full_name": 1,
+        },
+      },
+
+      { $sort: { apply_date: -1 } },
+    ];
+
+    const applications = await apply_jobs.aggregate(pipeline).toArray();
+
+    return res.json({
+      total: applications.length,
+      data: applications,
+    });
+  } catch (error) {
+    console.error("ERROR getApplyJobsForCompany:", error);
+    return res.status(500).json({
+      message: "Gagal mengambil data lamaran",
+    });
+  }
+};
+
 

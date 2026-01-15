@@ -68,7 +68,7 @@ const ProfilAum = () => {
   const submitHandler = async (formattedData) => {
     try {
       // formattedData di sini adalah objek FormData yang dibuat di DataAum.jsx
-      const response = await axios.post("http://localhost:5000/admin-aum/company/submit", formattedData, {
+      const response = await axios.post("http://localhost:5000/api/admin-aum/company/submit", formattedData, {
         headers: {
           "Content-Type": "multipart/form-data",
           "Authorization": `Bearer ${localStorage.getItem("accessToken")}`

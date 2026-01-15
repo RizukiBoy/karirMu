@@ -30,6 +30,16 @@ import DashboardPelamar from "./pages/pelamar/DashboardPelamar";
 import ListLowongan from "./pages/adminAum/ListLowongan";
 import Profile from "./pages/pelamar/Profile";
 
+import JobFields from "./pages/superadmin/JobField";
+import JobDetailPage from "./components/JobDetailPage";
+import AddProfile from "./components/users/Addprofile";
+import ApplicationList from "./pages/adminAum/ApplicationList";
+import ApplicationDetail from "./components/ApplicationDetail";
+import LoginAdmin from "./pages/superadmin/loginAdmin";
+import DashboardSuperAdmin from "./pages/superadmin/DashboardSuperAdmin";
+import AdminAumDetail from "./pages/superadmin/AdminAumDetail";
+import RegisterAum from "./auth/RegisterAum";
+
 function App() {
   const location = useLocation();
 
@@ -50,9 +60,15 @@ function App() {
         <Route path="/auth/register" element={<Register />} />
         <Route path="/auth/check-email" element={<CheckEmail />} />
         <Route path="/auth/activate" element={<ActivateAccount />} />
-        <Route path="/auth/set-password" element={<SetPassword />} />
+        <Route path="/auth/register-admin-aum" element={<RegisterAum />} />
+        
 
+        <Route element={<ProtectedRoute allowedRole={["pelamar"]} />}>
         <Route path="/user/profile" element={<Profile />} />
+        <Route path="/user/add-profile" element={<AddProfile />} />
+        <Route path="/user/dashboard" element={<DashboardPelamar />} />
+        </Route>
+
 
         {/* ADMIN AUM (PROTECTED) */}
         <Route element={<ProtectedRoute allowedRole={["company_hrd"]} />}>
@@ -63,13 +79,23 @@ function App() {
           <Route path="/admin-aum/lowongan" element={<Lowongan />} />
           <Route path="/admin-aum/list-lowongan" element={<ListLowongan />} />
           <Route path="/admin-aum/dokumen" element={<DokumenAum/>} />
+          <Route path="/admin-aum/list-pelamar" element={<ApplicationList />} />
+          <Route path="/job-field" element={<JobFields />} />
+          <Route path="/admin-aum/list-pelamar/:applyId" element={<ApplicationDetail />} />
+
+
         </Route>
 
         {/* PUBLIC */}
-        <Route path="/public/jobs" element={<JobList />} />
+        <Route path="/jobs" element={<JobList />} />
+        <Route path="/jobs/:jobId" element={<JobDetailPage />} />
 
         {/* PELAMAR */}
-        <Route path="/pelamar/dashboard" element={<DashboardPelamar />} />
+
+        <Route path="/super-admin/login" element={<LoginAdmin />} />
+        <Route path="/super-admin/dashboard" element={<DashboardSuperAdmin />} />
+        <Route path="/super-admin/detail/:companyId" element={<AdminAumDetail />} />
+
       </Routes>
 
       {!hideNavbarFooter && <Footer />}

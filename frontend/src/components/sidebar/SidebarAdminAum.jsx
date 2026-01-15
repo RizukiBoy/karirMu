@@ -7,7 +7,7 @@ import profileIcon from "../../assets/icons/document-text.svg";
 import tagsIcon from "../../assets/icons/tags.svg";
 import usersIcon from "../../assets/icons/users.svg";
 import settingIcon from "../../assets/icons/setting-2.svg";
-import vectorIcon from "../../assets/icons/vector.svg";
+// import vectorIcon from "../../assets/icons/vector.svg"
 import menuIcon from "../../assets/icons/menu.svg";
 import closeIcon from "../../assets/icons/iconClose.svg";
 
@@ -124,8 +124,8 @@ const SidebarAdminAum = () => {
           <SidebarItem
             icon={usersIcon}
             text="Manajemen Pelamar"
-            active={isActive("/admin-aum/pelamar")}
-            onClick={() => navigate("/admin-aum/pelamar")}
+            active={isActive("/admin-aum/list-pelamar")}
+            onClick={() => navigate("/admin-aum/list-pelamar")}
           />
 
           {/* ===== PENGATURAN ===== */}
@@ -140,7 +140,7 @@ const SidebarAdminAum = () => {
 
             {open && (
               <img
-                src={vectorIcon}
+                // src={vectorIcon}
                 className={`w-4 h-4 transition-transform duration-300 ${
                   openSetting ? "rotate-180" : ""
                 }`}

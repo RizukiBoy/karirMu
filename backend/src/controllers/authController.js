@@ -11,9 +11,9 @@ const companyHrd = client.db("karirMu").collection("company_hrd");
 
 exports.register = async (req, res) => {
   try {
-    const { email, register_as } = req.body;
+    const { email, fullName, password, register_as} = req.body;
 
-    if (!email || !register_as) {
+    if (!email || !fullName || !password) {
       return res.status(400).json({ message: "Email dan role wajib diisi" });
     }
 
@@ -26,13 +26,15 @@ exports.register = async (req, res) => {
       return res.status(409).json({ message: "Email sudah terdaftar" });
     }
 
+    hashedPassword = await bcrypt.hash(password, 10);
+
     const token = crypto.randomBytes(32).toString("hex");
 
     const result = await users.insertOne({
       email,
       role: register_as, // 🔥 SIMPAN ROLE
-      full_name: null,
-      password: null,
+      full_name : fullName,
+      password : hashedPassword,
       token,
       is_active: false,
       created_at: new Date(),
@@ -197,14 +199,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    // 4. Cek apakah password sudah dibuat
-    if (!user.password) {
-      return res.status(403).json({
-        message: "Password belum dibuat",
-      });
-    }
-
-    // 5. Validasi password
+    // 4. Validasi password
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -216,14 +211,14 @@ exports.login = async (req, res) => {
     // 🔥 ROLE LANGSUNG DARI USERS
     const role = user.role;
 
-    // 6. Generate JWT
+    // 5. Generate JWT
     const accessToken = generateToken({
       userId: user._id.toString(),
       role,
       email: user.email,
     });
 
-    // 7. Response sukses
+    // 6. Response sukses
     return res.status(200).json({
       message: "Login berhasil",
       accessToken,
@@ -241,4 +236,3 @@ exports.login = async (req, res) => {
     });
   }
 };
-

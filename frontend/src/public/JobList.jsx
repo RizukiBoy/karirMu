@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState} from "react";
 import axios from "axios";
 import JobCard from "../components/JobCard";
-import JobDetailModal from "../components/JobDetailModal";
+import { useNavigate } from "react-router-dom";
+
 
 const JobList = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedJob, setSelectedJob] = useState(null);
+  const navigate = useNavigate()
+
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -30,14 +32,13 @@ const JobList = () => {
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {jobs.map((job) => (
-          <JobCard
+         <JobCard
             key={job._id}
             job={job}
-            onSelect={setSelectedJob}
+            onClick={() => navigate(`/jobs/${job._id}`)}
           />
         ))}
       </div>
-      <JobDetailModal job={selectedJob} onClose={() => setSelectedJob(null)} />
     </>
   );
 };

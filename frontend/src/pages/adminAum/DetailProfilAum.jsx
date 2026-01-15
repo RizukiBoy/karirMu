@@ -116,6 +116,7 @@ const DetailProfilAum = () => {
 
       setShowEditModal(false);
     } catch (err) {
+      console.log(err.response);
       console.error("Gagal update profil:", err);
     }
   };
@@ -206,6 +207,8 @@ const DetailProfilAum = () => {
               <Row label="Jumlah Karyawan" value={company.employee_range} />
             </Card>
           </div>
+
+          <Row label="deskripsi" value={company.description} />
 
           {/* DOKUMEN */}
           <SectionHeader title="Dokumen Legalitas" />
@@ -312,6 +315,7 @@ const DetailProfilAum = () => {
           <Input label="Bidang Industri" name="industry" value={formData.industry} onChange={handleChange} />
           <Input label="Jumlah Karyawan" name="employee_range" value={formData.employee_range} onChange={handleChange} />
 
+
           <div className="md:col-span-2">
             <label className="text-gray-500 text-xs">Deskripsi</label>
             <textarea
@@ -321,6 +325,8 @@ const DetailProfilAum = () => {
               rows={3}
               className="w-full border border-gray-300 rounded px-3 py-2"
             />
+
+            
           </div>
 
           <div className="md:col-span-2">
@@ -367,6 +373,7 @@ const DetailProfilAum = () => {
               onClick={() => {
                 setFormData(company);
                 setShowEditModal(true);
+                // disabled={loading}
               }}
               className="border border-[#409144] text-[#409144] px-5 py-2 rounded font-semibold
                          hover:bg-[#409144] hover:text-white transition"
