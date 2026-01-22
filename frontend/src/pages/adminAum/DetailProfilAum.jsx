@@ -7,7 +7,6 @@ import AdminAumLayout from "../../components/layout/AdminAumLayout";
 import checkIcon from "../../assets/icons/ProfilAum/check.svg";
 import userIcon from "../../assets/icons/ProfilAum/user.svg";
 import docTextIcon from "../../assets/icons/ProfilAum/document-text.svg";
-import downloadIcon from "../../assets/icons/ProfilAum/document-download.svg";
 import closeIcon from "../../assets/icons/iconClose.svg";
 
 const DetailProfilAum = () => {
@@ -58,6 +57,7 @@ const DetailProfilAum = () => {
           setCompany(res.data.company);
           setDocuments(res.data.documents || []);
           setPreviewLogo(res.data.company.logo_url || null);
+          console.log(res.data.documents)
         }
       } catch (err) {
         console.error("Error fetching profile:", err);
@@ -177,7 +177,7 @@ const DetailProfilAum = () => {
 
               <div>
                 <p className="font-bold text-lg">{company.company_name}</p>
-                <p className="text-sm opacity-90">{company.description}</p>
+                <p className="text-sm opacity-90 line-clamp-2">{company.address}</p>
               </div>
             </div>
 
@@ -208,7 +208,10 @@ const DetailProfilAum = () => {
             </Card>
           </div>
 
-          <Row label="deskripsi" value={company.description} />
+          <p className="font-medium text-gray-500">Deskripsi</p>
+            <span className="text-black pt-2 flex text-wrap">
+              {company.description}
+            </span>
 
           {/* DOKUMEN */}
           <SectionHeader title="Dokumen Legalitas" />
@@ -217,28 +220,23 @@ const DetailProfilAum = () => {
             {documents.length > 0 ? (
               documents.map((doc, i) => (
                 <div
-                  key={i}
-                  className="bg-white rounded-md shadow-sm p-4 flex justify-between"
+                key={i}
+                className="bg-white rounded-md shadow-sm p-4"
                 >
-                  <div className="flex items-center gap-2">
-                    <img src={docTextIcon} className="w-5 h-5" />
-                    <span className="font-medium">{doc.document_name}</span>
+                  <div className="flex items-center gap-2 justify-between mb-4">
+                    <span className="font-medium">{doc.document_name.replace(/_/g, " ")}</span>
+                    <span className="text-sm text-white px-2 py-1 rounded bg-secondary">{doc.status}</span>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center border border-secondary border-2 rounded w-fit px-3 py-1">
+                    <img src={docTextIcon} className="w-6 h-6"/>
+                  
                     <a
                       href={doc.document_url}
                       target="_blank"
-                      className="border border-blue-600 text-blue-600 px-3 py-1 rounded text-xs"
+                      className="text-secondary px-3 py-2 pt-2 rounded text-xs"
                     >
                       Lihat
-                    </a>
-                    <a
-                      href={doc.document_url}
-                      download
-                      className="bg-blue-600 text-white px-3 py-1 rounded text-xs"
-                    >
-                      Unduh
                     </a>
                   </div>
                 </div>
@@ -249,6 +247,8 @@ const DetailProfilAum = () => {
               </p>
             )}
           </div>
+
+
 
           {showEditModal && (
   <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
@@ -323,7 +323,7 @@ const DetailProfilAum = () => {
               value={formData.description}
               onChange={handleChange}
               rows={3}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-2 line-clamp-4"
             />
 
             
@@ -417,9 +417,9 @@ const Card = ({ children }) => (
 );
 
 const Row = ({ label, value }) => (
-  <div className="flex px-4 py-3">
-    <span className="w-56 text-gray-500">{label}</span>
-    <span className="font-medium">{value}</span>
+  <div className="flex justify-between px-4 py-2">
+    <span className="w-1/2 text-gray-500">{label}</span>
+    <span className="w-1/2 font-medium line-clamp-1">{value}</span>
   </div>
 );
 

@@ -39,6 +39,9 @@ import LoginAdmin from "./pages/superadmin/loginAdmin";
 import DashboardSuperAdmin from "./pages/superadmin/DashboardSuperAdmin";
 import AdminAumDetail from "./pages/superadmin/AdminAumDetail";
 import RegisterAum from "./auth/RegisterAum";
+import ApplyJobPage from "./pages/pelamar/ApplyJobPage";
+import PublicJobDetail from "./pages/pelamar/PublicJobDetail";
+import ApplicationDetailClone from "./public/ApplicationDetailClone";
 
 function App() {
   const location = useLocation();
@@ -67,6 +70,8 @@ function App() {
         <Route path="/user/profile" element={<Profile />} />
         <Route path="/user/add-profile" element={<AddProfile />} />
         <Route path="/user/dashboard" element={<DashboardPelamar />} />
+        <Route path="/jobs/:jobId/apply" element={<ApplyJobPage />} />
+
         </Route>
 
 
@@ -88,7 +93,10 @@ function App() {
 
         {/* PUBLIC */}
         <Route path="/jobs" element={<JobList />} />
-        <Route path="/jobs/:jobId" element={<JobDetailPage />} />
+        <Route path="/jobs/:jobId" element={<PublicJobDetail />} />
+        <Route path="/application-detail" element={<ApplicationDetailClone />} />
+
+
 
         {/* PELAMAR */}
 

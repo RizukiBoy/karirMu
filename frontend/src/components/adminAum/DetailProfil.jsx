@@ -85,6 +85,7 @@ const handleSave = async () => {
         if (response.data) {
           setCompany(response.data.company);
           setDocuments(response.data.documents || []);
+
         }
       else {
         // Redirect jika belum ada perusahaan
@@ -104,6 +105,7 @@ const handleSave = async () => {
   if (!company) return null; 
 
   return (
+
     <AdminAumLayout>
       <div className="w-full flex justify-center px-4 py-6">
         <div className="w-full max-w-1124px flex flex-col gap-4">
@@ -182,7 +184,7 @@ const handleSave = async () => {
         </div>
 
         {/* FORM */}
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-2xl">
           <Input label="Nama Perusahaan" name="company_name" value={formData.company_name} onChange={handleChange} />
           <Input label="No Telepon" name="company_phone" value={formData.company_phone} onChange={handleChange} />
           <Input label="Email" name="company_email" value={formData.company_email} onChange={handleChange} />
@@ -408,6 +410,46 @@ const handleSave = async () => {
     </p>
   )}
 </div>
+
+            <div className="flex items-center gap-3">
+  {/* ===== BADGE STATUS ===== */}
+  {doc.dcoument.status === "approved" && (
+    <span className="text-sm px-3 py-1 bg-green-100 text-green-700 rounded">
+      Approved
+    </span>
+  )}
+
+  {doc.status === "rejected" && (
+    <span className="text-sm px-3 py-1 bg-red-100 text-red-700 rounded">
+      Rejected
+    </span>
+  )}
+
+  {(!doc.status || doc.status === "pending") && (
+    <span className="text-sm px-3 py-1 bg-yellow-100 text-yellow-700 rounded">
+      Pending
+    </span>
+  )}
+
+  {/* ===== ACTION BUTTONS (SUPER ADMIN ONLY) ===== */}
+  {doc.status === "pending" && (
+    <>
+      <button
+        onClick={() => verifyDocument(doc._id, "approved")}
+        className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+      >
+        Approve
+      </button>
+
+      <button
+        onClick={() => verifyDocument(doc._id, "rejected")}
+        className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+      >
+        Reject
+      </button>
+    </>
+  )}
+            </div>
 
 
           {/* EDIT BUTTON */}

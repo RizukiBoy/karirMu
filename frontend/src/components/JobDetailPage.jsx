@@ -1,23 +1,227 @@
+
+// import JobEditForm from "./adminAum/JobEditForm";
+// import ApplyJobButton from "./ApplyJobButton";
+
+// const JobDetailPage = () => {
+//   const { jobId } = useParams();
+//   const navigate = useNavigate();
+
+//   const [editMode, setEditMode] = useState(false);
+//   const [job, setJob] = useState(null);
+//   const [loading, setLoading] = useState(true);
+
+//   const canEditJob = () => {
+//     const role = localStorage.getItem("role");
+//     return role === "company_hrd";
+//   };
+
+// 
+//   return (
+//     <div className="max-w-5xl mx-auto px-4 py-10">
+//       {/* HEADER */}
+//       <div className="flex items-center gap-4 mb-6">
+//         <img
+//           src={job.company?.logo_url || "/placeholder-company.png"}
+//           alt="logo"
+//           className="w-16 h-16 object-contain rounded"
+//         />
+//         <div className="flex-1">
+//           <h1 className="text-2xl font-bold">{job.job_name}</h1>
+//           <p className="text-gray-500 text-sm">
+//             {job.company?.company_name} • {job.location}
+//           </p>
+//         </div>
+
+//         <button
+//           onClick={() => navigate(-1)}
+//           className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg"
+//         >
+//           Kembali anjay
+//         </button>
+//       </div>
+
+//       {/* BODY */}
+//       <div className="bg-white rounded-2xl shadow p-6">
+//         {editMode ? (
+//           <JobEditForm
+//             job={job}
+//             onCancel={() => setEditMode(false)}
+//             onSuccess={(updatedJob) => {
+//               setJob(updatedJob);
+//               setEditMode(false);
+//             }}
+//           />
+//         ) : (
+//           <div className="space-y-8">
+//             {/* INFO GRID */}
+//             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+//               <Info label="Lokasi" value={job.location} />
+//               <Info label="Tipe" value={formatJobType(job.type)} />
+//               <Info label="Bidang" value={job.job_field?.name} />
+//               <Info
+//                 label="Gaji"
+//                 value={
+//                   job.salary_min && job.salary_max
+//                     ? `Rp ${job.salary_min.toLocaleString()} - Rp ${job.salary_max.toLocaleString()}`
+//                     : "Dirahasiakan"
+//                 }
+//               />
+//             </div>
+
+//             {/* DESKRIPSI */}
+//             {job.description && (
+//               <section>
+//                 <h3 className="font-semibold mb-2">Deskripsi Pekerjaan</h3>
+//                 <p className="text-gray-700 whitespace-pre-line leading-relaxed">
+//                   {job.description}
+//                 </p>
+//               </section>
+//             )}
+
+//             {/* KUALIFIKASI */}
+//             <section>
+//               <h3 className="font-semibold mb-2">Kualifikasi</h3>
+//               <p className="text-gray-700 whitespace-pre-line leading-relaxed">
+//                 {job.requirement || "-"}
+//               </p>
+//             </section>
+//           </div>
+//         )}
+//       </div>
+
+//       {/* ACTION */}
+//       {!editMode && (
+//         <div className="mt-6 flex gap-4">
+//           <ApplyJobButton jobId={job._id} />
+
+//           {canEditJob() && (
+//             <button
+//               onClick={() => setEditMode(true)}
+//               className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl"
+//             >
+//               Edit Lowongan
+//             </button>
+//           )}
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// /* =======================
+//    Helpers
+// ======================= */
+
+// const Info = ({ label, value }) => (
+//   <div className="bg-gray-50 rounded-xl p-4">
+//     <p className="text-xs text-gray-500">{label}</p>
+//     <p className="font-medium text-gray-800">{value || "-"}</p>
+//   </div>
+// );
+
+// export default JobDetailPage;
+
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import JobEditForm from "./adminAum/JobEditForm";
-import ApplyJobButton from "./ApplyJobButton";
+import AdminAumLayout from "../components/layout/AdminAumLayout";
 
-const JobDetailPage = () => {
-  const { jobId } = useParams();
+// ICON
+import closeIcon from "../assets/icons/iconClose.svg";
+import userIcon from "../assets/icons/iconUser.svg";
+
+export default function JobDetailPage() {
   const navigate = useNavigate();
+  const { jobId } = useParams();
 
   const [editMode, setEditMode] = useState(false);
-  const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const canEditJob = () => {
-    const role = localStorage.getItem("role");
-    return role === "company_hrd";
-  };
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  // const [isActive, setIsActive] = useState(job.status);
 
-  useEffect(() => {
+ const JOB_TYPE_LABEL = {
+  full_time: "Penuh Waktu",
+  part_time: "Paruh Waktu",
+  internship: "Magang",
+  contract: "Kontrak",
+  freelance: "Freelance",
+};
+
+const formatJobType = (type) => {
+  return JOB_TYPE_LABEL[type] ?? type;
+};
+
+const WORK_TYPE_LABEL = {
+  onsite: "Di Kantor",
+  remote: "Remote",
+  hybrid: "Fleksibel",
+};
+
+const formatWorkType = (type) => {
+  return WORK_TYPE_LABEL[type] ?? type;
+};
+
+
+
+  const [job, setJob] = useState({
+  job_name: "",
+  work_type: "",
+  location: "",
+  type: "",
+  salary_min: "",
+  salary_max: "",
+  date_job: "",
+  description: "",
+  requirement: "",
+});
+
+const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  setJob((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
+
+
+const handleSave = async () => {
+  try {
+    const payload = {
+      ...job,
+      salary_min: job.salary_min ? Number(job.salary_min) : null,
+      salary_max: job.salary_max ? Number(job.salary_max) : null,
+    };
+
+    const res = await fetch(`http://localhost:5000/api/admin-aum/jobs/${job._id}`, {
+      method: job._id ? "PUT" : "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      throw new Error("Gagal menyimpan data");
+    }
+
+    const result = await res.json();
+    console.log("Saved:", result);
+
+    // optional UX
+    alert("Data berhasil disimpan");
+  } catch (error) {
+    console.error(error);
+    alert("Terjadi kesalahan saat menyimpan data");
+  }
+};
+
+
+
+    useEffect(() => {
     if (!jobId) return;
 
     const fetchDetail = async () => {
@@ -32,6 +236,7 @@ const JobDetailPage = () => {
           }
         );
         setJob(res.data.data);
+        console.log(res.data.data);
       } catch (error) {
         console.error("Gagal mengambil detail job:", error);
       } finally {
@@ -50,124 +255,261 @@ const JobDetailPage = () => {
     return <div className="p-10 text-center">Lowongan tidak ditemukan</div>;
   }
 
+  const handleDeactivate = async () => {
+  try {
+    setLoading(true);
+
+    await fetch(`http://localhost:5000/api/jobs/${jobId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        status: false,
+      }),
+    });
+
+    setJob((prev) => ({
+      ...prev,
+      status: false,
+    }));
+    setShowConfirm(false);
+  } catch (error) {
+    console.error("Gagal menonaktifkan lowongan", error);
+  } finally {
+    setLoading(false);
+  }
+  };
+
+
+
+  // Contoh state form edit
+
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
-      {/* HEADER */}
-      <div className="flex items-center gap-4 mb-6">
-        <img
-          src={job.company?.logo_url || "/placeholder-company.png"}
-          alt="logo"
-          className="w-16 h-16 object-contain rounded"
-        />
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold">{job.job_name}</h1>
-          <p className="text-gray-500 text-sm">
-            {job.company?.company_name} • {job.location}
+    <AdminAumLayout>
+      <div className="w-full flex justify-center px-4 py-6">
+        <div className="w-full max-w-1124px flex flex-col gap-4">
+
+          {/* HEADER */}
+          <div className="bg-white px-4 py-3 rounded-md shadow-sm text-sm flex items-center gap-2">
+            <span className="text-gray-500">Manajemen Lowongan</span>
+            <span className="text-gray-400">›</span>
+            <span className="font-semibold">Detail Lowongan</span>
+          </div>
+
+          {/* INFORMASI UTAMA */}
+          <div className="px-4 py-3 rounded-t-lg font-medium text-white"
+            style={{ background: "linear-gradient(90deg, #004F8F 0%, #009B49 100%)" }}
+          >
+            Informasi Utama
+          </div>
+          <div className="bg-white rounded-b-lg p-6 shadow-sm text-sm space-y-4">
+            <div>
+              <p className="font-semibold">{job.job_name}</p>
+            </div>
+            <div className="grid grid-cols-1 gap-y-2 gap-x-6">
+              <p><span className="text-gray-500">Tipe Kerja</span> : {formatJobType(job.type)}</p>
+              <p><span className="text-gray-500">Lokasi</span> : {job.location}</p>
+              <p><span className="text-gray-500">Tipe Pekerjaan</span> : {formatWorkType(job.work_type)}</p>
+              <p><span className="text-gray-500">Bidang </span> : {job.job_field.name}</p>
+            </div>
+          </div>
+
+          {/* DESKRIPSI */}
+          <div className="px-4 py-3 rounded-t-lg font-medium text-white"
+            style={{ background: "linear-gradient(90deg, #004F8F 0%, #009B49 100%)" }}
+          >
+            Deskripsi Pekerjaan
+          </div>
+          <div className="bg-white rounded-b-lg p-4 shadow-sm text-sm leading-relaxed space-y-4">
+            {job.description}
+          </div>
+
+          {/* PERSYARATAN */}
+          <div className="px-4 py-3 rounded-t-lg font-medium text-white"
+            style={{ background: "linear-gradient(90deg, #004F8F 0%, #009B49 100%)" }}
+          >
+            Persyaratan
+          </div>
+          <div className="bg-white rounded-b-lg p-4 shadow-sm text-sm space-y-2">
+            {job.requirement}
+          </div>
+
+          {/* RENTANG GAJI */}
+          <div className="px-4 py-3 rounded-t-lg font-medium text-white"
+            style={{ background: "linear-gradient(90deg, #004F8F 0%, #009B49 100%)" }}
+          >
+            Rentang Gaji & Tenggat Waktu
+          </div>
+          <div className="bg-white rounded-b-lg p-4 shadow-sm text-sm space-y-2">
+            <p>
+            <span className="text-gray-500">Rentang Gaji</span> :{" "}
+            {job.salary_min && job.salary_max
+              ? `Rp ${Number(job.salary_min).toLocaleString("id-ID")} - Rp ${Number(job.salary_max).toLocaleString("id-ID")}`
+              : "Dirahasiakan"}
           </p>
+
+            
+            <p><span className="text-gray-500">Tenggat Waktu</span> : {" "}
+              {job.date_job ? new Intl.DateTimeFormat("id-ID", {
+                day : "2-digit",
+                month: "long",
+                year: "numeric"
+              }).format(new Date(job.date_job)): "-"}
+            </p>
+                         
+          </div>
+
+          {/* BUTTON ACTION */}
+          <div className="bg-white rounded-md p-4 shadow-sm flex justify-between items-center">
+            <button
+              onClick={() => navigate(-1)}
+              className="border border-green-600 text-green-600 px-4 py-2 rounded-md text-sm font-semibold hover:bg-green-600 hover:text-white transition"
+            >
+              Kembali
+            </button>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="border border-blue-600 text-blue-600 px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-600 hover:text-white transition"
+              >
+                Edit Lowongan
+              </button>
+              <button
+                onClick={() => setShowConfirm(true)}
+                className="border border-red-600 text-red-600 px-4 py-2 rounded-md text-sm font-semibold hover:bg-red-600 hover:text-white transition"
+              >
+                Nonaktifkan
+              </button>
+            </div>
+          </div>
         </div>
 
-        <button
-          onClick={() => navigate(-1)}
-          className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg"
-        >
-          Kembali anjay
-        </button>
+        {/* ================= MODAL EDIT ================= */}
+{showEditModal && (
+  <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
+    <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-xl shadow-lg grid grid-rows-[auto_1fr_auto] overflow-hidden">
+
+      {/* HEADER */}
+      <div
+        className="px-5 py-3 text-white font-semibold flex justify-between items-center"
+        style={{ background: "linear-gradient(90deg, #004F8F, #009B49)" }}
+      >
+        Edit Lowongan
+        <img
+          src={closeIcon}
+          className="w-4 h-4 cursor-pointer filter invert"
+          onClick={() => setShowEditModal(false)}
+          alt="close"
+        />
       </div>
 
       {/* BODY */}
-      <div className="bg-white rounded-2xl shadow p-6">
-        {editMode ? (
-          <JobEditForm
-            job={job}
-            onCancel={() => setEditMode(false)}
-            onSuccess={(updatedJob) => {
-              setJob(updatedJob);
-              setEditMode(false);
-            }}
+      <div className="overflow-y-auto px-6 py-4 space-y-4 text-sm">
+
+        {/* INFO DASAR */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input label="Judul Lowongan" name="title" value={job.job_name} onChange={handleChange} />
+          <Input label="Tipe Kerja" name="tipeKerja" value={job.type} onChange={handleChange} />
+          <Input label="Lokasi" name="lokasi" value={job.location} onChange={handleChange} />
+          <Input label="Tipe Pekerjaan" name="tipePekerjaan" value={job.work_type} onChange={handleChange} />
+          <Input label="Rentang Gaji" name="gaji" value={job.salary_min} onChange={handleChange} />
+          <Input label="Rentang Gaji" name="gaji" value={job.salary_max} onChange={handleChange} />
+          <Input label="Tenggat Waktu" name="tenggat" value={job.date_job} onChange={handleChange} />
+        </div>
+
+        {/* DESKRIPSI */}
+        <div>
+          <label className="text-gray-500 text-xs">Deskripsi</label>
+          <textarea
+            name="deskripsi"
+            value={job.description}
+            onChange={handleChange}
+            rows={4}
+            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-400"
           />
-        ) : (
-          <div className="space-y-8">
-            {/* INFO GRID */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Info label="Lokasi" value={job.location} />
-              <Info label="Tipe" value={formatJobType(job.type)} />
-              <Info label="Bidang" value={job.job_field?.name} />
-              <Info
-                label="Gaji"
-                value={
-                  job.salary_min && job.salary_max
-                    ? `Rp ${job.salary_min.toLocaleString()} - Rp ${job.salary_max.toLocaleString()}`
-                    : "Dirahasiakan"
-                }
-              />
-            </div>
+        </div>
+        <div>
+          <label className="text-gray-500 text-xs mb-1 block">Persyaratan</label>
+          <textarea
+            name="persyaratan"
+            value={job.requirement}
+            onChange={(e) => setFormData({ ...job, persyaratan: e.target.value })}
+            rows={6}
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+            placeholder="Tuliskan persyaratan, pisahkan baris jika perlu"
+          />
+        </div>
 
-            {/* DESKRIPSI */}
-            {job.description && (
-              <section>
-                <h3 className="font-semibold mb-2">Deskripsi Pekerjaan</h3>
-                <p className="text-gray-700 whitespace-pre-line leading-relaxed">
-                  {job.description}
-                </p>
-              </section>
-            )}
-
-            {/* KUALIFIKASI */}
-            <section>
-              <h3 className="font-semibold mb-2">Kualifikasi</h3>
-              <p className="text-gray-700 whitespace-pre-line leading-relaxed">
-                {job.requirement || "-"}
-              </p>
-            </section>
-          </div>
-        )}
       </div>
 
-      {/* ACTION */}
-      {!editMode && (
-        <div className="mt-6 flex gap-4">
-          <ApplyJobButton jobId={job._id} />
-
-          {canEditJob() && (
-            <button
-              onClick={() => setEditMode(true)}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl"
-            >
-              Edit Lowongan
-            </button>
-          )}
+      {/* FOOTER */}
+      <div className="px-6 pb-4 bg-white">
+        <div className="border-t border-gray-200/70 my-4"></div>
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={() => setShowEditModal(false)}
+            className="px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50 transition"
+          >
+            Batal
+          </button>
+          <button
+            onClick={handleSave}
+            className="px-4 py-2 bg-[#409144] text-white rounded text-sm font-semibold hover:bg-[#367a3a] transition"
+          >
+            Simpan
+          </button>
         </div>
-      )}
+      </div>
+
     </div>
+  </div>
+)}
+
+
+        {/* ================= POPUP KONFIRMASI NONAKTIFKAN ================= */}
+        {showConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white w-full max-w-md rounded-xl shadow-lg overflow-hidden">
+              {/* Judul */}
+              <div className="px-6 py-5">
+                <h2 className="text-xl font-bold text-center">Konfirmasi Perubahan</h2>
+              </div>
+              <div className="px-6"><hr className="border-gray-200" /></div>
+              {/* Isi */}
+              <div className="px-10 py-4 text-sm text-gray-700 space-y-4">
+                <p>Apakah Anda yakin ingin menonaktifkan lowongan "{job.job_name}"?</p>
+                <p className="text-gray-500 text-xs">
+                  Pelamar tidak akan bisa melihat atau melamar pada lowongan ini setelah dinonaktifkan.
+                </p>
+              </div>
+              <div className="px-6"><hr className="border-gray-200" /></div>
+              {/* Tombol */}
+              <div className="px-6 py-4 flex gap-4">
+                <button onClick={() => setShowConfirm(false)}
+                        className="flex-1 border border-green-600 text-green-600 py-2.5 rounded-lg font-semibold hover:bg-green-50">
+                  Batal
+                </button>
+                <button onClick={handleDeactivate}
+                        className="flex-1 bg-red-600 text-white py-2.5 rounded-lg font-semibold hover:bg-red-700">
+                  Nonaktifkan
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
+    </AdminAumLayout>
   );
-};
+}
 
-/* =======================
-   Helpers
-======================= */
-
-const Info = ({ label, value }) => (
-  <div className="bg-gray-50 rounded-xl p-4">
-    <p className="text-xs text-gray-500">{label}</p>
-    <p className="font-medium text-gray-800">{value || "-"}</p>
+// ===================== Input Component =====================
+const Input = ({ label, name, value, onChange }) => (
+  <div className="flex flex-col">
+    <label className="text-gray-500 text-xs">{label}</label>
+    <input type="text" name={name} value={value} onChange={onChange}
+           className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-400 text-sm"/>
   </div>
 );
-
-const formatJobType = (type) => {
-  switch (type) {
-    case "full_time":
-      return "Penuh Waktu";
-    case "part_time":
-      return "Paruh Waktu";
-    case "internship":
-      return "Magang";
-    case "contract":
-      return "Kontrak";
-    case "freelance":
-      return "Freelance";
-    default:
-      return type;
-  }
-};
-
-export default JobDetailPage;

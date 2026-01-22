@@ -113,7 +113,6 @@ const ProfilAum = () => {
                 setAgree={setAgree}
               />
             </div>
-
           </div>
         </div>
       </div>

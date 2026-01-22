@@ -33,8 +33,6 @@ router.get(
 // CREATE job field
 router.post(
   "/",
-  authMiddleware,
-  companyMiddleware,
   createJobField
 );
 

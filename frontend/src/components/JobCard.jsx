@@ -1,32 +1,83 @@
+ import { useNavigate } from "react-router-dom"
+ 
+ const JOB_TYPE_LABEL = {
+  full_time: "Penuh Waktu",
+  part_time: "Paruh Waktu",
+  internship: "Magang",
+  contract: "Kontrak",
+  freelance: "Freelance",
+};
+
+const formatJobType = (type) => {
+  return JOB_TYPE_LABEL[type] ?? type;
+};
+
+
 const JobCard = ({ job, onClick }) => {
+  const navigate = useNavigate();
+  
   return (
-    <div onClick={onClick} className="bg-white rounded-2xl shadow p-5 flex flex-col justify-between">
-      <div>
-        {/* HEADER */}
-        <div className="flex items-center gap-3 mb-4">
-          <div>
-            <h2 className="font-semibold">{job.job_name}</h2>
-            <p className="text-sm text-gray-500">
-              {job.company?.company_name}
-            </p>
-          </div>
-        </div>
+  <div className="overflow-x-auto md:overflow-visible">
+    <table className="w-full text-sm border-l border-r border-gray-200">
+      <tbody>
+          <tr onClick={onClick}
+            key={job._id}
+            className="border-b border-gray-200"
+          >
+            <td className="px-4 py-4 w-1/5">
+              <p className="font-semibold line-clamp-1">{job.job_name}</p>
+            </td>
 
-        {/* INFO */}
-        <p className="text-sm text-gray-600">📍 {job.location}</p>
-        <p className="text-sm text-gray-600">💼 {job.type}</p>
-        <p className="text-sm text-gray-600">🏷️ {job.category}</p>
+            <td className="px-4 py-4 w-1/5">
+              <p className="text-gray-800">{formatJobType(job.type)}</p>
+            </td>
 
-        <p className="text-sm font-medium text-gray-800 mt-3">
-          💰{" "}
-          {job.salary_min && job.salary_max
-            ? `Rp ${job.salary_min.toLocaleString()} - Rp ${job.salary_max.toLocaleString()}`
-            : "Gaji dirahasiakan"}
-        </p>
-      </div>
+            <td className="px-4 py-4 w-1/5 truncate">
+              {job.date_job ? new Intl.DateTimeFormat("id-ID", {
+                day : "2-digit",
+                month: "long",
+                year: "numeric"
+              }).format(new Date(job.date_job)): "-"}
+            </td>
 
-      {/* ACTION */}
-    </div>
+            <td className="px-4 py-4 w-1/5">
+              {job.status ? (
+                <span className="px-3 py-1 text-xs rounded-full bg-green-600 text-white">
+                  Aktif
+                </span>
+              ) : (
+                <span className="w-fit px-3 py-1 text-xs rounded-full bg-red-500 text-white line-clamp-1">
+                  Non-Aktif
+                </span>
+              )}
+            </td>
+
+            <td className="px-4 py-4 w-1/5">
+<button
+  onClick={() =>
+    navigate("/admin-aum/list-lowongan", {
+      state: { job },
+    })
+  }
+  className="
+    px-4 py-1.5
+    border border-green-600
+    text-green-600
+    rounded-full
+    text-xs
+    hover:bg-green-600
+    hover:text-white
+    transition
+  "
+>
+  Detail
+</button>
+
+            </td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
   );
 };
 

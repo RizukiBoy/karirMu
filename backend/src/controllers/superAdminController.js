@@ -211,7 +211,6 @@ exports.getAdminAumList = async (req, res) => {
   }
 };
 
-
 exports.verifyCompanyDocument = async (req, res) => {
   try {
     const { documentId } = req.params;

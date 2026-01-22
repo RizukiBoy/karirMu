@@ -2,6 +2,7 @@ import { useEffect, useState} from "react";
 import axios from "axios";
 import JobCard from "../components/JobCard";
 import { useNavigate } from "react-router-dom";
+import PublicJobCard from "../components/users/PublicJobCard";
 
 
 const JobList = () => {
@@ -32,7 +33,7 @@ const JobList = () => {
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {jobs.map((job) => (
-         <JobCard
+         <PublicJobCard
             key={job._id}
             job={job}
             onClick={() => navigate(`/jobs/${job._id}`)}

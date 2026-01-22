@@ -79,6 +79,34 @@ exports.getApplicantDetailForCompany = async (req, res) => {
       },
 
       {
+        $lookup: {
+          from: "user_educations",
+          localField: "user_id",
+          foreignField: "user_id",
+          as: "educations",
+        },
+      },
+
+      {
+        $lookup: {
+          from: "user_skills",
+          localField: "user_id",
+          foreignField: "user_id",
+          as: "skills",
+        },
+      },
+
+  // ===== JOIN WORK EXPERIENCE =====
+      {
+        $lookup: {
+          from: "work_experience",
+          localField: "user_id",
+          foreignField: "user_id",
+          as: "work_experiences",
+        },
+      },
+
+      {
         $project: {
           apply_status: 1,
           apply_date: 1,
@@ -97,6 +125,30 @@ exports.getApplicantDetailForCompany = async (req, res) => {
           "profile.whatsapp": 1,
           "profile.gender": 1,
           "profile.age": 1,
+
+          educations: {
+        _id: 1,
+        study_level: 1,
+        institution: 1,
+        major: 1,
+        graduate: 1,
+      },
+
+      // ===== SKILLS =====
+      skills: {
+        _id: 1,
+        name_skill: 1,
+      },
+
+      // ===== WORK EXPERIENCES =====
+      work_experiences: {
+        _id: 1,
+        company_name: 1,
+        job_title: 1,
+        start_date: 1,
+        end_date: 1,
+        description: 1,
+      },
         },
       },
     ];

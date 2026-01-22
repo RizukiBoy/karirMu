@@ -34,11 +34,14 @@ exports.createJobField = async (req, res) => {
       updated_at: new Date(),
     };
 
-    await jobFields.insertOne(newJobField);
+    const result = await jobFields.insertOne(newJobField);
 
     return res.status(201).json({
       message: "Job field berhasil dibuat",
-      data: newJobField,
+      data: {
+        _id: result.insertedId, // ✅ INI KUNCINYA
+        ...newJobField,
+      },
     });
   } catch (error) {
     console.error("ERROR createJobField:", error);
@@ -63,7 +66,7 @@ exports.getJobFields = async (req, res) => {
 
     return res.status(200).json({
       message: "List job fields",
-      data: fields,
+      data: fields, // ✅ ADA _id
     });
   } catch (error) {
     console.error("ERROR getJobFields:", error);
@@ -73,6 +76,7 @@ exports.getJobFields = async (req, res) => {
     });
   }
 };
+
 
 exports.deleteJobField = async (req, res) => {
   try {

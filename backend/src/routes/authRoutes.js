@@ -9,19 +9,18 @@ const companyMiddleware = require("../middleware/companyMiddleware");
 
 const router = express.Router();
 
-router.post("/register", register);
-
-// 🔥 HARUS GET (klik link email)
-router.post("/activate", activateAccount);
-
-router.post("/login", login);
-
 router.get("/dashboard-user", authmiddleware, (req, res) => {
   res.status(201).json({ message: "dashboard user" });
 });
 router.get("/dashboard-admin-aum", authmiddleware, companyMiddleware, (req, res) => {
   res.status(201).json({ message: "dashboard admin aum" });
 });
+
+router.post("/register", register);
+
+router.post("/activate", activateAccount);
+
+router.post("/login", login);
 /**
  * @swagger
  * tags:
@@ -34,7 +33,7 @@ router.get("/dashboard-admin-aum", authmiddleware, companyMiddleware, (req, res)
  * /api/auth/register:
  *   post:
  *     summary: Register a new user
- *     description: Register user with email only. User can choose to register as normal user or company HRD.
+ *     description: Register a new user using full name, email, and password.
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -43,21 +42,27 @@ router.get("/dashboard-admin-aum", authmiddleware, companyMiddleware, (req, res)
  *           schema:
  *             type: object
  *             required:
+ *               - full_name
  *               - email
- *               - register_as
+ *               - password
  *             properties:
+ *               full_name:
+ *                 type: string
+ *                 description: Full name of the user
+ *                 example: Okta Riski
  *               email:
  *                 type: string
- *                 description: User email
+ *                 format: email
+ *                 description: User email address
  *                 example: user@test.com
- *               register_as:
+ *               password:
  *                 type: string
- *                 description: Role selection for registration (user or company_hrd)
- *                 enum: [user, company_hrd]
- *                 example: user
+ *                 format: password
+ *                 description: User password (minimum 8 characters recommended)
+ *                 example: P@ssw0rd123
  *     responses:
  *       201:
- *         description: Registration successful, email sent for activation
+ *         description: Registration successful
  *         content:
  *           application/json:
  *             schema:
@@ -65,9 +70,21 @@ router.get("/dashboard-admin-aum", authmiddleware, companyMiddleware, (req, res)
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Registrasi berhasil, silakan cek email untuk aktivasi.
+ *                   example: Registrasi berhasil
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: 65f1c9a2e3b1a9d123456789
+ *                     full_name:
+ *                       type: string
+ *                       example: Okta Riski
+ *                     email:
+ *                       type: string
+ *                       example: user@test.com
  *       400:
- *         description: Email atau register_as tidak dikirim
+ *         description: Validation error
  *         content:
  *           application/json:
  *             schema:
@@ -75,9 +92,9 @@ router.get("/dashboard-admin-aum", authmiddleware, companyMiddleware, (req, res)
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Email harus diisi
+ *                   example: Full name, email, dan password wajib diisi
  *       409:
- *         description: Email sudah terdaftar
+ *         description: Email already registered
  *         content:
  *           application/json:
  *             schema:
@@ -87,7 +104,7 @@ router.get("/dashboard-admin-aum", authmiddleware, companyMiddleware, (req, res)
  *                   type: string
  *                   example: Email sudah terdaftar
  *       500:
- *         description: Server error
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:
@@ -154,77 +171,6 @@ router.post("/register", register);
  */
 
 router.post("/activate", activateAccount);
-
-/**
- * @swagger
- * /api/auth/set-password:
- *   post:
- *     summary: Set password for the first time and auto login
- *     description: User sets their password using the token sent via email after account activation.
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - token
- *               - full_name
- *               - password
- *             properties:
- *               token:
- *                 type: string
- *                 description: Token from email activation
- *                 example: "e3b0c44298fc1c149afbf4c8996fb924"
- *               full_name:
- *                 type: string
- *                 example: "John Doe"
- *               password:
- *                 type: string
- *                 example: "password123"
- *     responses:
- *       200:
- *         description: Password set successfully, user auto logged in
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Password berhasil dibuat
- *                 accessToken:
- *                   type: string
- *                 user:
- *                   type: object
- *                   properties:
- *                     full_name:
- *                       type: string
- *                     email:
- *                       type: string
- *       400:
- *         description: Validation errors (missing input, token invalid, account not active, password exists)
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Token tidak valid atau sudah kedaluwarsa
- *       500:
- *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Server error
- */
-
 
 /**
  * @swagger

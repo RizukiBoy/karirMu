@@ -180,7 +180,6 @@ exports.createCompanyProfileWithDocuments = async (req, res) => {
   }
 };
 
-
 exports.getDocumentsByCompany = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -240,6 +239,12 @@ exports.getDocumentsByCompany = async (req, res) => {
       .find({ company_id: companyObjectId })
       .toArray();
 
+      const documentStats = {
+        total : documents.length,
+        approved: documents.filter(d => d.status === "approved").length,
+        rejected: documents.filter(d => d.status === "rejected").length,
+        pending: documents.filter(d => !d.status || d.status === "pending").length,
+      }
     // =======================
     // 4️⃣ Response
     // =======================
@@ -247,6 +252,7 @@ exports.getDocumentsByCompany = async (req, res) => {
       message: "List company documents",
       company,
       documents,
+      document_stats : documentStats,
     });
   } catch (error) {
     console.error("ERROR getDocumentsByCompany:", error);
@@ -375,42 +381,4 @@ const companyId = new ObjectId(user.company_id);
   }
 };
 
-exports.ValidateDocument = async (req, res) => {
-    try {
-        const {documentId} = req.params;
-        const { status } = req.body;
-
-        if(!["approved", "rejected"].includes(status)) {
-            return res.status(400).json({
-                message: "status harus approved atau rejected",
-            });
-        }
-
-        const result = await companyDocuments.updateOne(
-            {_id: new ObjectId(documentId)},
-            {
-                $set: {
-                    status,
-                    validated_at : new Date(),
-                    updated_at: new Date(),
-                },
-            }
-        );
-
-        if(result.matchedCount === 0 ) {
-            return res.status(404).json({
-                message: "Document tidak ditemukan",
-            })
-        }
-
-        res.json({
-            message: "document berhasil divalidasi",
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: "gagal validasi document",
-            error : error.message,
-        })
-    }
-}
 

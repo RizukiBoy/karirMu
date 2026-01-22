@@ -5,19 +5,7 @@ const {addAdmin, login, getAdminAumList, getAdminAumDetail, verifyCompanyDocumen
 
 router.post("/add", addAdmin)
 router.post("/login", login);
-router.post("/dashboard", superAdmin, (req, res) => {
-  res.json({
-    message: "Selamat datang Superadmin",
-    admin: req.admin,
-  });
-});
-
-router.get("/dashboard", superAdmin, (req, res) => {
-  res.json({
-    message: "Selamat datang Superadmin",
-    admin: req.admin,
-  });
-});
+router.get("/dashboard", superAdmin);
 
 router.get("/admin-aum", getAdminAumList)
 router.get("/admin-aum/:companyId", getAdminAumDetail)

@@ -3,6 +3,7 @@ const { client } = require("../config/database");
 const companyHrd = client
   .db("karirMu")
   .collection("company_hrd");
+
 exports.getMyCompanyHRD = async (req, res) => {
   try {
     const userId = req.user.userId;
