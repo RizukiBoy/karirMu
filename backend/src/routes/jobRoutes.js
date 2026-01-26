@@ -7,7 +7,11 @@ const {
     createJobs, getJobDetail, getJobsByCompany, updateJob,
     updateJobAdminAUM, applyJob,
     getApplyJobsForCompany,
-    updateJobStatus
+    updateJobStatus,
+    saveJob,
+    unsaveJob,
+    getSavedJobsForUser,
+    checkSavedJob
 } = require("../controllers/jobController");
 const companyMiddleware = require("../middleware/companyMiddleware");
 const { getApplicantDetailForCompany, updateApplication } = require("../controllers/applyJobController");
@@ -38,5 +42,12 @@ router.post(
 
 router.get("/applications/:applyId", authMiddleware, roleMiddleware("company_hrd"), getApplicantDetailForCompany);
 router.patch("/applications/:applyId", authMiddleware, roleMiddleware("company_hrd"), updateApplication)
+
+router.post("/saved-jobs", authMiddleware, saveJob);
+router.delete("/saved-jobs/:jobId", authMiddleware, unsaveJob);
+router.get("/saved-jobs", authMiddleware, getSavedJobsForUser);
+router.get(
+  "/saved-jobs/check/:jobId", authMiddleware, checkSavedJob);
+
 
 module.exports = router;

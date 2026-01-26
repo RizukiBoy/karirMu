@@ -224,7 +224,7 @@ const DashboardAdminAum = () => {
                       <td style={tdStyleCenter}>
                         <button
                           onClick={() =>
-                            navigate("/admin-aum/lihat-pelamar", {
+                            navigate(`/admin-aum/jobs/${job._id}`, {
                               state: { jobId: job._id, jobName: job.job_name },
                             })
                           }

@@ -48,7 +48,7 @@ const SidebarAdminAum = () => {
       className={`flex items-center gap-3 h-12 px-3 cursor-pointer border-l-4 transition-all
         ${
           active
-            ? "bg-gray-100 border-gray-800 font-semibold"
+            ? "bg-gray-200 border-gray-800 font-semibold"
             : "border-transparent hover:bg-gray-50"
         }
       `}
@@ -111,7 +111,7 @@ const SidebarAdminAum = () => {
             icon={profileIcon}
             text="Profil & Legalitas AUM"
             active={isActive("/admin-aum/profil")}
-            onClick={() => navigate("/admin-aum/profil")}
+            onClick={() => navigate("/admin-aum/profile")}
           />
 
           <SidebarItem

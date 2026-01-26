@@ -19,7 +19,6 @@ import SetPassword from "./auth/SetPassword";
 import DashboardAdminAum from "./pages/adminAum/DashboardAdminAum";
 import ProfilAum from "./pages/adminAum/ProfilAum";
 import DetailProfilAum from "./pages/adminAum/DetailProfilAum";
-import Lowongan from "./pages/adminAum/lowongan";
 import DataAum from "./components/adminAum/DataAum";
 import DokumenAum from "./components/adminAum/DokumenAum";
 
@@ -32,7 +31,7 @@ import Profile from "./pages/pelamar/Profile";
 
 import JobFields from "./pages/superadmin/JobField";
 import JobDetailPage from "./components/JobDetailPage";
-import AddProfile from "./components/users/Addprofile";
+import AddProfile from "./components/users/ProfileForm";
 import ApplicationList from "./pages/adminAum/ApplicationList";
 import ApplicationDetail from "./components/ApplicationDetail";
 import LoginAdmin from "./pages/superadmin/loginAdmin";
@@ -42,6 +41,13 @@ import RegisterAum from "./auth/RegisterAum";
 import ApplyJobPage from "./pages/pelamar/ApplyJobPage";
 import PublicJobDetail from "./pages/pelamar/PublicJobDetail";
 import ApplicationDetailClone from "./public/ApplicationDetailClone";
+import BuatLowongan from "./pages/adminAum/BuatLowongan";
+import CariLowongan from "./pages/pelamar/CariLowongan";
+import HistoryJobs from "./pages/pelamar/HistoryJobs";
+import SavedJobs from "./pages/pelamar/SavedJobs";
+import PengajuanAum from "./pages/superadmin/PengajuanAum";
+import Education from "./pages/pelamar/Education";
+import ProfileForm from "./components/users/ProfileForm";
 
 function App() {
   const location = useLocation();
@@ -65,44 +71,49 @@ function App() {
         <Route path="/auth/activate" element={<ActivateAccount />} />
         <Route path="/auth/register-admin-aum" element={<RegisterAum />} />
         
-
+        {/* PELAMAR */}
         <Route element={<ProtectedRoute allowedRole={["pelamar"]} />}>
         <Route path="/user/profile" element={<Profile />} />
-        <Route path="/user/add-profile" element={<AddProfile />} />
+        <Route path="/user/education" element={<Education />} />
+        <Route path="/user/add-profile" element={<ProfileForm />} />
         <Route path="/user/dashboard" element={<DashboardPelamar />} />
         <Route path="/jobs/:jobId/apply" element={<ApplyJobPage />} />
-
+        <Route path="/cari-lowongan" element={<CariLowongan />} />
+        <Route path="/user/history-jobs" element={<HistoryJobs />} />
+        <Route path="user/saved-jobs" element={<SavedJobs />} />
         </Route>
 
 
         {/* ADMIN AUM (PROTECTED) */}
         <Route element={<ProtectedRoute allowedRole={["company_hrd"]} />}>
           <Route path="/admin-aum/dashboard" element={<DashboardAdminAum />} />
-          <Route path="/admin-aum/profil" element={<ProfilAum />} />
+          <Route path="/admin-aum/profile" element={<ProfilAum />} />
           <Route path="/admin-aum/detail" element={<DetailProfilAum />} />
           <Route path="/admin-aum/data" element={<DataAum />} />
-          <Route path="/admin-aum/lowongan" element={<Lowongan />} />
           <Route path="/admin-aum/list-lowongan" element={<ListLowongan />} />
           <Route path="/admin-aum/dokumen" element={<DokumenAum/>} />
           <Route path="/admin-aum/list-pelamar" element={<ApplicationList />} />
-          <Route path="/job-field" element={<JobFields />} />
           <Route path="/admin-aum/list-pelamar/:applyId" element={<ApplicationDetail />} />
+          <Route path="/admin-aum/jobs/:jobId" element={<JobDetailPage />} />
+
 
 
         </Route>
 
         {/* PUBLIC */}
-        <Route path="/jobs" element={<JobList />} />
+        <Route path="/jobs" element={<CariLowongan />} />
         <Route path="/jobs/:jobId" element={<PublicJobDetail />} />
         <Route path="/application-detail" element={<ApplicationDetailClone />} />
+        <Route path="/buat-lowongan" element={<BuatLowongan />} />
 
 
-
-        {/* PELAMAR */}
 
         <Route path="/super-admin/login" element={<LoginAdmin />} />
         <Route path="/super-admin/dashboard" element={<DashboardSuperAdmin />} />
+        <Route path="/super-admin/pengajuan-aum" element={<PengajuanAum />} />
         <Route path="/super-admin/detail/:companyId" element={<AdminAumDetail />} />
+        <Route path="/job-field" element={<JobFields />} />
+
 
       </Routes>
 

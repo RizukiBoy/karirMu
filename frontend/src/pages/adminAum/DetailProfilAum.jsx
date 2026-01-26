@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import AdminAumLayout from "../../components/layout/AdminAumLayout";
+import EditProfileAum from "./EditProfileAum";
 
 // ICONS
 import checkIcon from "../../assets/icons/ProfilAum/check.svg";
@@ -14,14 +15,14 @@ const DetailProfilAum = () => {
 
   const [company, setCompany] = useState(null);
   const [documents, setDocuments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(true);
 
   // ===== EDIT STATE =====
   const [showEditModal, setShowEditModal] = useState(false);
-  const [formData, setFormData] = useState({});
+  // const [formData, setFormData] = useState({});
   const [previewLogo, setPreviewLogo] = useState(null);
-  const [logoFile, setLogoFile] = useState(null);
+  // const [logoFile, setLogoFile] = useState(null);
 
   const openEditModal = () => {
   setFormData({
@@ -70,56 +71,57 @@ const DetailProfilAum = () => {
   }, []);
 
   // ===== HANDLERS =====
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData((prev) => ({ ...prev, [name]: value }));
+  // };
 
-  const handleLogoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setLogoFile(file);
-      setPreviewLogo(URL.createObjectURL(file));
-    }
-  };
+  // const handleLogoChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     setLogoFile(file);
+  //     setPreviewLogo(URL.createObjectURL(file));
+  //   }
+  // };
 
-  const handleSave = async () => {
-    try {
+  // const handleSave = async () => {
+  //   try {
 
-      const payload = new FormData();
-          Object.entries(formData).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        payload.append(key, value);
-      }
-    });
+  //     const payload = new FormData();
+  //         Object.entries(formData).forEach(([key, value]) => {
+  //     if (value !== undefined && value !== null) {
+  //       payload.append(key, value);
+  //     }
+  //   });
 
-    // append logo jika ada
-    if (logoFile) {
-      payload.append("logo", logoFile);
-    }
-      await axios.put(
-        "http://localhost:5000/api/admin-aum/company/edit-profile",
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
-      );
+  //   // append logo jika ada
+  //   if (logoFile) {
+  //     payload.append("logo", logoFile);
+  //   }
+  //     await axios.put(
+  //       "http://localhost:5000/api/admin-aum/company/edit-profile",
+  //       payload,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+  //         },
+  //       }
+  //     );
 
-      // update UI tanpa reload
-      setCompany((prev) => ({
-        ...prev,
-        ...formData,
-        logo_url: previewLogo || prev.logo_url,
-      }));
+  //     // update UI tanpa reload
+  //     setCompany((prev) => ({
+  //       ...prev,
+  //       ...formData,
+  //       logo_url: previewLogo || prev.logo_url,
+  //     }));
 
-      setShowEditModal(false);
-    } catch (err) {
-      console.log(err.response);
-      console.error("Gagal update profil:", err);
-    }
-  };
+  //     setShowEditModal(false);
+  //     navigate("/admin-aum/profile")
+  //   } catch (err) {
+  //     console.log(err.response);
+  //     console.error("Gagal update profil:", err);
+  //   }
+  // };
 
   if (loading) return <p className="text-center py-6">Loading...</p>;
   if (!company) return null;
@@ -250,130 +252,127 @@ const DetailProfilAum = () => {
 
 
 
-          {showEditModal && (
-  <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
-    <div className="bg-white w-full max-w-2xl max-h-[90vh]
-                    rounded-xl shadow-lg grid grid-rows-[auto_1fr_auto]
-                    overflow-hidden">
+          {/* {showEditModal && (
+          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
+            <div className="bg-white w-full max-w-2xl max-h-[90vh]
+                            rounded-xl shadow-lg grid grid-rows-[auto_1fr_auto]
+                            overflow-hidden">
 
-      {/* HEADER */}
-      <div
-        className="px-5 py-3 text-white font-semibold
-                   flex justify-between items-center"
-        style={{ background: "linear-gradient(90deg, #004F8F, #009B49)" }}
-      >
-        Edit Profile
-        <img
-          src={closeIcon}
-          className="w-4 h-4 cursor-pointer filter invert"
-          onClick={() => setShowEditModal(false)}
-        />
-      </div>
-
-      {/* BODY */}
-      <div className="overflow-y-auto">
-
-        {/* FOTO */}
-        <div className="px-6 pt-6">
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-              {previewLogo ? (
-                <img src={previewLogo} className="w-full h-full object-cover" />
-              ) : (
-                <img src={userIcon} className="w-8 h-8 opacity-60" />
-              )}
-            </div>
-
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Foto Profil</p>
-              <label className="inline-flex items-center gap-2
-                                px-3 py-1.5 border border-gray-300 rounded
-                                cursor-pointer text-sm hover:bg-gray-50">
-                Edit Foto
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoChange}
-                  className="hidden"
+              <div
+                className="px-5 py-3 text-white font-semibold
+                          flex justify-between items-center"
+                style={{ background: "linear-gradient(90deg, #004F8F, #009B49)" }}
+              >
+                Edit Profile
+                <img
+                  src={closeIcon}
+                  className="w-4 h-4 cursor-pointer filter invert"
+                  onClick={() => setShowEditModal(false)}
                 />
-              </label>
-              <p className="text-[11px] text-gray-400 mt-1">
-                PNG / JPG · max 2MB
-              </p>
+              </div>
+
+              <div className="overflow-y-auto">
+
+                <div className="px-6 pt-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-20 h-20 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                      {previewLogo ? (
+                        <img src={previewLogo} className="w-full h-full object-cover" />
+                      ) : (
+                        <img src={userIcon} className="w-8 h-8 opacity-60" />
+                      )}
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Foto Profil</p>
+                      <label className="inline-flex items-center gap-2
+                                        px-3 py-1.5 border border-gray-300 rounded
+                                        cursor-pointer text-sm hover:bg-gray-50">
+                        Edit Foto
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoChange}
+                          className="hidden"
+                        />
+                      </label>
+                      <p className="text-[11px] text-gray-400 mt-1">
+                        PNG / JPG · max 2MB
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <Input label="Nama Perusahaan" name="company_name" value={formData.company_name} onChange={handleChange} />
+                  <Input label="No Telepon" name="company_phone" value={formData.company_phone} onChange={handleChange} />
+                  <Input label="Email" name="company_email" value={formData.company_email} onChange={handleChange} />
+                  <Input label="Website" name="company_url" value={formData.company_url} onChange={handleChange} />
+                  <Input label="Provinsi" name="province" value={formData.province} onChange={handleChange} />
+                  <Input label="Kota / Kabupaten" name="city" value={formData.city} onChange={handleChange} />
+                  <Input label="Bidang Industri" name="industry" value={formData.industry} onChange={handleChange} />
+                  <Input label="Jumlah Karyawan" name="employee_range" value={formData.employee_range} onChange={handleChange} />
+
+
+                  <div className="md:col-span-2">
+                    <label className="text-gray-500 text-xs">Deskripsi</label>
+                    <textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      rows={3}
+                      className="w-full border border-gray-300 rounded px-3 py-2 line-clamp-4"
+                    />
+
+                    
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="text-gray-500 text-xs">Alamat</label>
+                    <textarea
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      rows={2}
+                      className="w-full border border-gray-300 rounded px-3 py-2"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-6 pb-4">
+                <div className="border-t border-gray-200/70 my-4"></div>
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setShowEditModal(false)}
+                    className="px-4 py-2 border border-gray-300 rounded text-sm"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    disabled={loading}
+                    className="px-4 py-2 bg-[#409144] text-white rounded
+                              text-sm font-semibold hover:bg-[#367a3a]"
+                  >
+                    {loading ? "Menyimpan..." : "Simpan"}
+                  </button>
+                </div>
+              </div>
+
             </div>
           </div>
-        </div>
-
-        {/* FORM */}
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <Input label="Nama Perusahaan" name="company_name" value={formData.company_name} onChange={handleChange} />
-          <Input label="No Telepon" name="company_phone" value={formData.company_phone} onChange={handleChange} />
-          <Input label="Email" name="company_email" value={formData.company_email} onChange={handleChange} />
-          <Input label="Website" name="company_url" value={formData.company_url} onChange={handleChange} />
-          <Input label="Provinsi" name="province" value={formData.province} onChange={handleChange} />
-          <Input label="Kota / Kabupaten" name="city" value={formData.city} onChange={handleChange} />
-          <Input label="Bidang Industri" name="industry" value={formData.industry} onChange={handleChange} />
-          <Input label="Jumlah Karyawan" name="employee_range" value={formData.employee_range} onChange={handleChange} />
-
-
-          <div className="md:col-span-2">
-            <label className="text-gray-500 text-xs">Deskripsi</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows={3}
-              className="w-full border border-gray-300 rounded px-3 py-2 line-clamp-4"
-            />
-
-            
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="text-gray-500 text-xs">Alamat</label>
-            <textarea
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              rows={2}
-              className="w-full border border-gray-300 rounded px-3 py-2"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* FOOTER */}
-      <div className="px-6 pb-4">
-        <div className="border-t border-gray-200/70 my-4"></div>
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={() => setShowEditModal(false)}
-            className="px-4 py-2 border border-gray-300 rounded text-sm"
-          >
-            Batal
-          </button>
-          <button
-            onClick={handleSave}
-            className="px-4 py-2 bg-[#409144] text-white rounded
-                       text-sm font-semibold hover:bg-[#367a3a]"
-          >
-            Simpan
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-)}
+)} */}
 
 
           {/* EDIT BUTTON */}
           <div className="bg-white rounded-md p-4 flex justify-end shadow-sm">
             <button
               onClick={() => {
-                setFormData(company);
+                // setFormData(company);
                 setShowEditModal(true);
                 // disabled={loading}
+
               }}
               className="border border-[#409144] text-[#409144] px-5 py-2 rounded font-semibold
                          hover:bg-[#409144] hover:text-white transition"
@@ -395,6 +394,14 @@ const DetailProfilAum = () => {
           onSave={handleSave}
         />
       )} */}
+
+
+      <EditProfileAum
+  open={showEditModal}
+  initialData={company}
+  onClose={() => setShowEditModal(false)}
+  onSuccess={(updatedCompany) => setCompany(updatedCompany)}
+/>
     </AdminAumLayout>
   );
 };

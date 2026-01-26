@@ -457,7 +457,7 @@ const handleAccept = async () => {
           pelamar berikut?
         </p>
 
-        <p className="font-medium text-gray-800">{applicantName}</p>
+        <p className="font-medium text-gray-800">{applicant?.full_name}</p>
 
         <p className="text-gray-500 text-xs">
           Pesan yang Anda tulis akan dikirimkan ke pelamar.

@@ -417,66 +417,9 @@ exports.getWorkExperienceByUser = async (req, res) => {
   }
 };
 
-exports.updateWorkExperience = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const {
-      company_name,
-      job_title,
-      start_date,
-      end_date,
-      description,
-    } = req.body;
 
-    const updateData = {
-      updated_at: new Date(),
-    };
 
-    if (company_name) updateData.company_name = company_name;
-    if (job_title) updateData.job_title = job_title;
-    if (start_date) updateData.start_date = Number(start_date);
-    if (end_date !== undefined)
-      updateData.end_date = end_date ? Number(end_date) : null;
-    if (description !== undefined) updateData.description = description;
 
-    const result = await workExperiences.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: updateData }
-    );
-
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ message: "Data tidak ditemukan" });
-    }
-
-    return res.status(200).json({
-      message: "Work experience berhasil diperbarui",
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-exports.deleteWorkExperience = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const result = await workExperiences.deleteOne({
-      _id: new ObjectId(id),
-    });
-
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ message: "Data tidak ditemukan" });
-    }
-
-    return res.status(200).json({
-      message: "Work experience berhasil dihapus",
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
 
 
 

@@ -186,6 +186,8 @@ exports.getAdminAumList = async (req, res) => {
       {
         $project: {
           email: 1,
+          created_at: 1,
+          industry: 1,
           company_id: "$hrd.company_id",
           company_name: "$company.company_name",
 

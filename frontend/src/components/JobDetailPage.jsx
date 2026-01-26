@@ -130,6 +130,7 @@ import AdminAumLayout from "../components/layout/AdminAumLayout";
 // ICON
 import closeIcon from "../assets/icons/iconClose.svg";
 import userIcon from "../assets/icons/iconUser.svg";
+import JobEditForm from "./adminAum/JobEditForm";
 
 export default function JobDetailPage() {
   const navigate = useNavigate();
@@ -255,9 +256,11 @@ const handleSave = async () => {
     return <div className="p-10 text-center">Lowongan tidak ditemukan</div>;
   }
 
-  const handleDeactivate = async () => {
+  const handleToggleStatus = async () => {
   try {
     setLoading(true);
+
+    const newStatus = !job.status;
 
     await fetch(`http://localhost:5000/api/jobs/${jobId}`, {
       method: "PATCH",
@@ -265,13 +268,13 @@ const handleSave = async () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        status: false,
+        status: newStatus,
       }),
     });
 
     setJob((prev) => ({
       ...prev,
-      status: false,
+      status: newStatus,
     }));
     setShowConfirm(false);
   } catch (error) {
@@ -311,7 +314,11 @@ const handleSave = async () => {
               <p><span className="text-gray-500">Tipe Kerja</span> : {formatJobType(job.type)}</p>
               <p><span className="text-gray-500">Lokasi</span> : {job.location}</p>
               <p><span className="text-gray-500">Tipe Pekerjaan</span> : {formatWorkType(job.work_type)}</p>
-              <p><span className="text-gray-500">Bidang </span> : {job.job_field.name}</p>
+              <p>
+                <span className="text-gray-500">Bidang </span> :{" "}
+                {job.job_field?.name || job.job_field_name || "-"}
+              </p>
+
             </div>
           </div>
 
@@ -351,11 +358,11 @@ const handleSave = async () => {
 
             
             <p><span className="text-gray-500">Tenggat Waktu</span> : {" "}
-              {job.date_job ? new Intl.DateTimeFormat("id-ID", {
+              {job?.created_at ? new Intl.DateTimeFormat("id-ID", {
                 day : "2-digit",
                 month: "long",
                 year: "numeric"
-              }).format(new Date(job.date_job)): "-"}
+              }).format(new Date(job?.created_at)): "-"}
             </p>
                          
           </div>
@@ -376,22 +383,46 @@ const handleSave = async () => {
               >
                 Edit Lowongan
               </button>
+
+            {job?.status ? (
               <button
-                onClick={() => setShowConfirm(true)}
-                className="border border-red-600 text-red-600 px-4 py-2 rounded-md text-sm font-semibold hover:bg-red-600 hover:text-white transition"
+                onClick={handleToggleStatus}
+                className="flex-1 p-3 rounded-lg font-semibold text-white transition bg-red-600 hover:bg-red-700"
               >
                 Nonaktifkan
               </button>
+            ) : (
+              <button
+                onClick={handleToggleStatus}
+                className="flex-1 p-3 rounded-lg font-semibold text-white transition bg-emerald-600 hover:bg-emerald-700"
+              >
+                Aktifkan
+              </button>
+            )}
+
+
             </div>
           </div>
         </div>
 
+     {/* BODY */}
+    {/* <div className="overflow-y-auto px-6 py-4">
+      <JobEditForm
+        job={job}
+        onCancel={() => setShowEditModal(false)}
+        onSuccess={(updatedJob) => {
+          setJob(updatedJob);
+          setShowEditModal(false);
+        }}
+      />
+</div> */}
+
+
         {/* ================= MODAL EDIT ================= */}
-{showEditModal && (
+{/* {showEditModal && (
   <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
     <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-xl shadow-lg grid grid-rows-[auto_1fr_auto] overflow-hidden">
 
-      {/* HEADER */}
       <div
         className="px-5 py-3 text-white font-semibold flex justify-between items-center"
         style={{ background: "linear-gradient(90deg, #004F8F, #009B49)" }}
@@ -405,10 +436,8 @@ const handleSave = async () => {
         />
       </div>
 
-      {/* BODY */}
       <div className="overflow-y-auto px-6 py-4 space-y-4 text-sm">
 
-        {/* INFO DASAR */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input label="Judul Lowongan" name="title" value={job.job_name} onChange={handleChange} />
           <Input label="Tipe Kerja" name="tipeKerja" value={job.type} onChange={handleChange} />
@@ -419,7 +448,6 @@ const handleSave = async () => {
           <Input label="Tenggat Waktu" name="tenggat" value={job.date_job} onChange={handleChange} />
         </div>
 
-        {/* DESKRIPSI */}
         <div>
           <label className="text-gray-500 text-xs">Deskripsi</label>
           <textarea
@@ -444,7 +472,6 @@ const handleSave = async () => {
 
       </div>
 
-      {/* FOOTER */}
       <div className="px-6 pb-4 bg-white">
         <div className="border-t border-gray-200/70 my-4"></div>
         <div className="flex justify-end gap-3">
@@ -465,40 +492,106 @@ const handleSave = async () => {
 
     </div>
   </div>
+)} */}
+
+
+{showEditModal && (
+  <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
+    <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-xl shadow-lg grid grid-rows-[auto_1fr_auto] overflow-hidden">
+
+      {/* HEADER */}
+      <div
+        className="px-5 py-3 text-white font-semibold flex justify-between items-center"
+        style={{ background: "linear-gradient(90deg, #004F8F, #009B49)" }}
+      >
+        Edit Lowongan
+        <img
+          src={closeIcon}
+          className="w-4 h-4 cursor-pointer filter invert"
+          onClick={() => setShowEditModal(false)}
+          alt="close"
+        />
+      </div>
+
+      {/* BODY → ISI DARI JobEditForm */}
+      <div className="overflow-y-auto px-6 py-4">
+        <JobEditForm
+          job={job}
+          onCancel={() => setShowEditModal(false)}
+          onSuccess={(updatedJob) => {
+            setJob(updatedJob);
+            setShowEditModal(false);
+          }}
+        />
+      </div>
+
+    </div>
+  </div>
 )}
 
 
+
         {/* ================= POPUP KONFIRMASI NONAKTIFKAN ================= */}
-        {showConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <div className="bg-white w-full max-w-md rounded-xl shadow-lg overflow-hidden">
-              {/* Judul */}
-              <div className="px-6 py-5">
-                <h2 className="text-xl font-bold text-center">Konfirmasi Perubahan</h2>
-              </div>
-              <div className="px-6"><hr className="border-gray-200" /></div>
-              {/* Isi */}
-              <div className="px-10 py-4 text-sm text-gray-700 space-y-4">
-                <p>Apakah Anda yakin ingin menonaktifkan lowongan "{job.job_name}"?</p>
-                <p className="text-gray-500 text-xs">
-                  Pelamar tidak akan bisa melihat atau melamar pada lowongan ini setelah dinonaktifkan.
-                </p>
-              </div>
-              <div className="px-6"><hr className="border-gray-200" /></div>
-              {/* Tombol */}
-              <div className="px-6 py-4 flex gap-4">
-                <button onClick={() => setShowConfirm(false)}
-                        className="flex-1 border border-green-600 text-green-600 py-2.5 rounded-lg font-semibold hover:bg-green-50">
-                  Batal
-                </button>
-                <button onClick={handleDeactivate}
-                        className="flex-1 bg-red-600 text-white py-2.5 rounded-lg font-semibold hover:bg-red-700">
-                  Nonaktifkan
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+{showConfirm && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div className="bg-white w-full max-w-md rounded-xl shadow-lg overflow-hidden">
+      
+      {/* Judul */}
+      <div className="px-6 py-5">
+        <h2 className="text-xl font-bold text-center">
+          Konfirmasi Perubahan
+        </h2>
+      </div>
+
+      <div className="px-6">
+        <hr className="border-gray-200" />
+      </div>
+
+      {/* Isi */}
+      <div className="px-10 py-4 text-sm text-gray-700 space-y-4">
+        <p>
+          Apakah Anda yakin ingin{" "}
+          <b>{job?.status ? "menonaktifkan" : "mengaktifkan"}</b> lowongan{" "}
+          "<b>{job?.job_name}</b>"?
+        </p>
+
+        <p className="text-gray-500 text-xs">
+          {job?.status
+            ? "Pelamar tidak akan bisa melihat atau melamar pada lowongan ini setelah dinonaktifkan."
+            : "Lowongan ini akan kembali tampil dan bisa dilamar oleh pelamar."}
+        </p>
+      </div>
+
+      <div className="px-6">
+        <hr className="border-gray-200" />
+      </div>
+
+      {/* Tombol */}
+      <div className="px-6 py-4 flex gap-4">
+        <button
+          onClick={() => setShowConfirm(false)}
+          className="flex-1 border border-gray-400 text-gray-700 py-2.5 rounded-lg font-semibold hover:bg-gray-50"
+        >
+          Batal
+        </button>
+
+        <button
+          onClick={handleToggleStatus} 
+          className={`flex-1 py-2.5 rounded-lg font-semibold text-white transition
+            ${
+              job?.status
+                ? "bg-red-600 hover:bg-red-700"
+                : "bg-emerald-600 hover:bg-emerald-700"
+            }
+          `}
+        >
+          {job?.status ? "Nonaktifkan" : "Aktifkan"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
       </div>
     </AdminAumLayout>

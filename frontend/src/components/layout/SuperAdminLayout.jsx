@@ -1,13 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+// ICONSAX
+import { Notification, Logout, ProfileCircle } from "iconsax-reactjs";
+
+// COMPONENTS
+import SidebarSuperAdmin from "../sidebar/SidebarSuperAdmin";
 
 export default function SuperAdminLayout({ children }) {
   const navigate = useNavigate();
+  const [open, setOpen] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("adminAccessToken");
     if (!token) {
-      navigate("/superadmin/login");
+      navigate("/super-admin/login");
     }
   }, [navigate]);
 
@@ -17,59 +24,61 @@ export default function SuperAdminLayout({ children }) {
   const logout = () => {
     localStorage.removeItem("adminAccessToken");
     localStorage.removeItem("adminData");
-    navigate("/superadmin/login");
+    navigate("/super-admin/login");
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
-      {/* SIDEBAR */}
-      <aside className="w-64 bg-white border-r p-5 space-y-6">
-        <div>
-          <h1 className="text-lg font-semibold text-emerald-600">
-            Superadmin
-          </h1>
-          <p className="text-xs text-gray-500">
-            Dashboard Control
-          </p>
+    <div className="min-h-screen bg-gray-100">
+      <div className="bg-white border border-gray-200">
+        {/* TOPBAR */}
+        <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200">
+          {/* LEFT */}
+          <div className="flex items-center gap-3">
+            <h1
+              className="font-bold text-lg cursor-pointer"
+              onClick={() => navigate("/super-admin/dashboard")}
+            >
+              KarirMU
+            </h1>
+          </div>
+
+          {/* RIGHT */}
+          <div className="flex items-center gap-4">
+            {/* NOTIFICATION */}
+            <Notification
+              size="20"
+              variant="Outline"
+              className="text-gray-700 cursor-pointer"
+            />
+
+            <span className="text-sm text-gray-600">
+              Halo, Admin Super
+            </span>
+
+            {/* LOGOUT */}
+            <button
+              onClick={logout}
+              className="flex items-center gap-2"
+            >
+              <ProfileCircle
+                size="28"
+                variant="Bold"
+                className="text-gray-700"
+              />
+              <span className="text-sm">Logout</span>
+            </button>
+          </div>
         </div>
 
-        <nav className="space-y-2 text-sm">
-          <button
-            onClick={() => navigate("/superadmin/dashboard")}
-            className="block w-full text-left px-3 py-2 rounded-lg hover:bg-emerald-50"
-          >
-            Dashboard
-          </button>
+        {/* BODY */}
+        <div className="flex">
+          <SidebarSuperAdmin open={open} setOpen={setOpen} />
 
-          <button
-            onClick={() => navigate("/superadmin/admin/add")}
-            className="block w-full text-left px-3 py-2 rounded-lg hover:bg-emerald-50"
-          >
-            Tambah Admin
-          </button>
-        </nav>
-
-        <div className="pt-4 border-t">
-          <p className="text-xs text-gray-500">
-            Login sebagai
-          </p>
-          <p className="text-sm font-medium">
-            {admin.name || "Admin"}
-          </p>
-
-          <button
-            onClick={logout}
-            className="mt-3 text-red-500 text-sm"
-          >
-            Logout
-          </button>
+          <main className="flex-1 p-6 bg-gray-50 overflow-y-auto ml-8">
+            {children}
+          </main>
         </div>
-      </aside>
-
-      {/* CONTENT */}
-      <main className="flex-1 p-6">
-        {children}
-      </main>
+      </div>
     </div>
   );
 }

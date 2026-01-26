@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 
-const {getPublicJobs} = require("../controllers/jobController");
+const {getPublicJobs, getPublicJobDetail} = require("../controllers/jobController");
 
-router.get("/jobs/:jobId", getPublicJobs)
+router.get("/jobs/:jobId", getPublicJobDetail)
 router.get("/jobs", getPublicJobs)
 
 

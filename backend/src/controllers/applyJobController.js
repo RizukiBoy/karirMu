@@ -166,6 +166,78 @@ exports.getApplicantDetailForCompany = async (req, res) => {
   }
 };
 
+exports.getAppliedJobsForUser = async (req, res) => {
+  try {
+    const userId = req.user.userId; // dari JWT/session
+
+    const data = await apply_jobs.aggregate([
+      {
+        $match: {
+          user_id: new ObjectId(userId),
+        },
+      },
+
+      // JOIN ke jobs
+      {
+        $lookup: {
+          from: "jobs",
+          localField: "job_id",
+          foreignField: "_id",
+          as: "job",
+        },
+      },
+      { $unwind: "$job" },
+
+      // JOIN ke companies
+      {
+        $lookup: {
+          from: "companies",
+          localField: "job.company_id",
+          foreignField: "_id",
+          as: "company",
+        },
+      },
+      { $unwind: "$company" },
+
+      {
+        $project: {
+          _id: 1,
+          apply_status: 1,
+          apply_date: 1,
+          updated_at: 1,
+          hrd_notes: 1,
+          cv_url: 1,
+
+          // field dari jobs
+          "job._id": 1,
+          "job.job_name": 1,
+          "job.location": 1,
+          "job.type": 1,
+          "job.work_type": 1,
+          "job.salary_min": 1,
+          "job.salary_max": 1,
+          "job.status": 1,
+
+          // field dari company
+          "company._id": 1,
+          "company.company_name": 1,
+          "company.logo_url": 1, // optional kalau ada
+        },
+      },
+      {
+        $sort: { apply_date: -1 }, // terbaru dulu
+      },
+    ]).toArray();
+
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Gagal ambil data lamaran" });
+  }
+};
+
+
+
 exports.updateApplication = async (req, res) => {
   try {
     if (!req.user) {

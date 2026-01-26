@@ -11,6 +11,7 @@ const companies = client.db("karirMu").collection("companies");
 const jobFields = client.db("karirMu").collection("job_fields")
 const apply_jobs = client.db("karirMu").collection("apply_jobs")
 const user_documents = client.db("karirMu").collection("user_documents");
+const saved_jobs = client.db("karirMu").collection("saved_jobs");
 
 
 exports.createJobs = async (req, res) => {
@@ -56,6 +57,7 @@ exports.createJobs = async (req, res) => {
         job_field_id,
         job_name,
         location,
+        address,
         type,
         work_type,
         salary_min,
@@ -135,6 +137,7 @@ exports.createJobs = async (req, res) => {
         job_field_id: jobFieldObjectId,
         job_name: job_name.trim(),
         location: location.trim(),
+        address,
         type,
         work_type,
         salary_min: salary_min !== undefined ? Number(salary_min) : null,
@@ -294,6 +297,96 @@ exports.getPublicJobs = async (req, res) => {
     });
   }
 };
+
+
+exports.getPublicJobDetail = async (req, res) => {
+  try {
+    const { jobId } = req.params;
+
+    if (!ObjectId.isValid(jobId)) {
+      return res.status(400).json({ message: "Job ID tidak valid" });
+    }
+
+    const pipeline = [
+      {
+        $match: {
+          _id: new ObjectId(jobId),
+          status: true,
+        },
+      },
+
+      // JOIN COMPANY
+      {
+        $lookup: {
+          from: "companies",
+          localField: "company_id",
+          foreignField: "_id",
+          as: "company",
+        },
+      },
+      { $unwind: "$company" },
+
+      // JOIN JOB FIELD
+      {
+        $lookup: {
+          from: "job_fields",
+          localField: "job_field_id",
+          foreignField: "_id",
+          as: "job_field",
+        },
+      },
+      {
+        $unwind: {
+          path: "$job_field",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      // RESPONSE SHAPE
+      {
+        $project: {
+          job_name: 1,
+          location: 1,
+          type: 1,
+          date_job: 1,
+          work_type: 1,
+          salary_min: 1,
+          salary_max: 1,
+          description: 1,
+          requirement: 1,
+          created_at: 1,
+
+          company: {
+            _id: "$company._id",
+            company_name: "$company.company_name",
+            logo_url: "$company.logo_url",
+          },
+
+          job_field: {
+            _id: "$job_field._id",
+            name: "$job_field.name",
+          },
+        },
+      },
+    ];
+
+    const data = await jobs.aggregate(pipeline).toArray();
+
+    if (!data.length) {
+      return res.status(404).json({ message: "Lowongan tidak ditemukan" });
+    }
+
+    return res.status(200).json({
+      data: data[0], // ⬅️ sekarang OBJECT, bukan ARRAY
+    });
+  } catch (error) {
+    console.error("ERROR getPublicJobDetail:", error);
+    return res.status(500).json({
+      message: "Gagal mengambil detail lowongan",
+    });
+  }
+};
+
 
 // exports.getJobsByCompany = async (req, res) => {
 //   try {
@@ -615,24 +708,35 @@ exports.getJobDetail = async (req, res) => {
  const job = await jobs.aggregate([
   { $match: { _id: jobObjectId } },
 
-  {
-    $addFields: {
-      job_field_id: {
-        $cond: [
-          { $eq: [{ $type: "$job_field_id" }, "string"] },
-          { $toObjectId: "$job_field_id" },
-          "$job_field_id",
-        ],
-      },
-      company_id: {
-        $cond: [
-          { $eq: [{ $type: "$company_id" }, "string"] },
-          { $toObjectId: "$company_id" },
-          "$company_id",
-        ],
-      },
+{
+  $addFields: {
+    job_field_id: {
+      $cond: [
+        {
+          $and: [
+            { $eq: [{ $type: "$job_field_id" }, "string"] },
+            { $ne: ["$job_field_id", ""] },
+          ],
+        },
+        { $toObjectId: "$job_field_id" },
+        "$job_field_id",
+      ],
+    },
+    company_id: {
+      $cond: [
+        {
+          $and: [
+            { $eq: [{ $type: "$company_id" }, "string"] },
+            { $ne: ["$company_id", ""] },
+          ],
+        },
+        { $toObjectId: "$company_id" },
+        "$company_id",
+      ],
     },
   },
+},
+
 
   {
     $lookup: {
@@ -664,8 +768,8 @@ exports.getJobDetail = async (req, res) => {
       salary_min: 1,
       salary_max: 1,
       requirement: 1,
-      status: 1,
       created_at: 1,
+      status: 1,
       job_field: {
         _id: "$job_field._id",
         name: "$job_field.name",
@@ -735,6 +839,7 @@ exports.updateJobAdminAUM = async (req, res) => {
       "job_name",
       "job_field_id",
       "location",
+      "address",
       "type",
       "work_type",
       "description",   // ✅ KEMBALI
@@ -1074,5 +1179,115 @@ exports.getApplyJobsForCompany = async (req, res) => {
     });
   }
 };
+
+exports.saveJob = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { job_id } = req.body;
+
+    await saved_jobs.insertOne({
+      user_id: new ObjectId(userId),
+      job_id: new ObjectId(job_id),
+      saved_at: new Date(),
+    });
+
+    res.json({ message: "Job berhasil disimpan" });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(400).json({ message: "Job sudah disimpan" });
+    }
+
+    console.error(err);
+    res.status(500).json({ message: "Gagal menyimpan job" });
+  }
+};
+
+exports.unsaveJob = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { jobId } = req.params;
+
+    await saved_jobs.deleteOne({
+      user_id: new ObjectId(userId),
+      job_id: new ObjectId(jobId),
+    });
+
+    res.json({ message: "Job dihapus dari simpanan" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Gagal menghapus simpanan" });
+  }
+};
+
+exports.getSavedJobsForUser = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const data = await saved_jobs.aggregate([
+      { $match: { user_id: new ObjectId(userId) } },
+
+      {
+        $lookup: {
+          from: "jobs",
+          localField: "job_id",
+          foreignField: "_id",
+          as: "job",
+        },
+      },
+      { $unwind: "$job" },
+
+      {
+        $lookup: {
+          from: "companies",
+          localField: "job.company_id",
+          foreignField: "_id",
+          as: "company",
+        },
+      },
+      { $unwind: "$company" },
+
+      {
+        $project: {
+          _id: 1,
+          saved_at: 1,
+          "job._id": 1,
+          "job.job_name": 1,
+          "job.location": 1,
+          "job.type": 1,
+          "job.work_type": 1,
+          "job.salary_min": 1,
+          "job.salary_max": 1,
+          "company.company_name": 1,
+        },
+      },
+      { $sort: { saved_at: -1 } },
+    ]).toArray();
+
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Gagal ambil job tersimpan" });
+  }
+};
+
+exports.checkSavedJob = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { jobId } = req.params;
+
+    const exist = await saved_jobs.findOne({
+      user_id: new ObjectId(userId),
+      job_id: new ObjectId(jobId),
+    });
+
+    res.json({ saved: !!exist });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Gagal cek saved job" });
+  }
+};
+
+
+
 
 

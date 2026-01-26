@@ -178,7 +178,7 @@ export default function ListLowongan() {
   </div>
 
 {jobs.map((job) => (
-  <JobCard key={job._id} job={job} onClick={() => navigate(`/jobs/${job._id}`)} />
+  <JobCard key={job._id} job={job} onClick={() => navigate(`/admin-aum/jobs/${job._id}`)} />
 ))}
 </div>
     {/* PAGINATION CARD */}
@@ -205,7 +205,7 @@ export default function ListLowongan() {
     {/* BUTTON CARD */}
     <div className="bg-white rounded-lg shadow-sm px-6 py-4 flex justify-end">
       <button
-        onClick={() => navigate("/admin-aum/buat-lowongan")}
+        onClick={() => navigate("/buat-lowongan")}
         className="
           bg-green-600
           text-white

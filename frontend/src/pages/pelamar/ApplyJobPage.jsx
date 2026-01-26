@@ -29,7 +29,7 @@ const ApplyJobPage = () => {
     const fetchData = async () => {
       try {
         const [jobRes, docRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/public/jobs`),
+          axios.get(`http://localhost:5000/api/public/jobs/${jobId}`),
           axios.get(`http://localhost:5000/api/user/document`, {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -90,7 +90,7 @@ const ApplyJobPage = () => {
       <h1 className="text-2xl font-bold mb-6">Konfirmasi Lamaran</h1>
 
       {/* Job Info */}
-{job.length === 0 ? (
+{/* {job.length === 0 ? (
   <p className="text-sm text-gray-500">Tidak ada lowongan</p>
 ) : (
   job.map((item) => (
@@ -106,7 +106,21 @@ const ApplyJobPage = () => {
       </p>
     </div>
   ))
+)} */}
+
+{/* Job Info */}
+{!job ? (
+  <p className="text-sm text-gray-500">Lowongan tidak ditemukan</p>
+) : (
+  <div className="border rounded p-4 mb-3">
+    <h3 className="font-semibold">{job.job_name}</h3>
+    <p className="text-sm text-gray-600">{job.location}</p>
+    <p className="text-xs text-gray-500">
+      {job.job_field?.name || "-"}
+    </p>
+  </div>
 )}
+
 
       {/* CV Section */}
 <div className="border rounded-lg p-4 bg-gray-50">

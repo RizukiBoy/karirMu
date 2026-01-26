@@ -373,10 +373,8 @@ const companyId = new ObjectId(user.company_id);
       company: result.value,
     });
   } catch (error) {
-    console.error("ERROR updateCompanyProfile:", error);
     return res.status(500).json({
       message: "Gagal memperbarui profil company",
-      error: error.message,
     });
   }
 };
