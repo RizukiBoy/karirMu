@@ -21,6 +21,7 @@ const companies = client
     .collection("companies");
 
 const companyHrd = client.db("karirMu").collection("company_hrd");
+const industries = client.db("karirMu").collection("industries");
 
 exports.createCompanyProfileWithDocuments = async (req, res) => {
   try {
@@ -64,7 +65,7 @@ exports.createCompanyProfileWithDocuments = async (req, res) => {
       description,
       address,
       employee_range,
-      industry,
+      industry_id,
       company_email,
       company_phone,
       company_url,
@@ -118,6 +119,27 @@ exports.createCompanyProfileWithDocuments = async (req, res) => {
     const logoUrl = req.files.logo[0].path;
 
     // =======================
+// 3️⃣.1 Validasi industry
+// =======================
+    if (!industry_id || !ObjectId.isValid(industry_id)) {
+      return res.status(400).json({
+        message: "Industry wajib dipilih",
+      });
+    }
+
+    const industryObjectId = new ObjectId(industry_id);
+
+    const industry = await industries.findOne({
+      _id: industryObjectId,
+    });
+
+    if (!industry) {
+      return res.status(400).json({
+        message: "Industry tidak valid",
+      });
+    }
+
+    // =======================
     // 6️⃣ Simpan / update COMPANY
     // =======================
     await companies.updateOne(
@@ -129,7 +151,7 @@ exports.createCompanyProfileWithDocuments = async (req, res) => {
           address,
           city,
           province,
-          industry,
+          industry_id: industryObjectId,
           employee_range: Number(employee_range),
           company_email,
           company_phone,
@@ -223,14 +245,34 @@ exports.getDocumentsByCompany = async (req, res) => {
     // =======================
     // 2️⃣ Ambil company
     // =======================
-    const company = await companies.findOne({
-      _id: companyObjectId,
-    });
-    if (!company) {
+    const companyAgg = await companies.aggregate([
+      {
+        $match: { _id: companyObjectId },
+      },
+      {
+        $lookup: {
+          from: "industries",
+          localField: "industry_id",
+          foreignField: "_id",
+          as: "industry",
+        },
+      },
+      {
+        $unwind: {
+          path: "$industry",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]).toArray();
+
+    if (!companyAgg.length) {
       return res.status(404).json({
         message: "Perusahaan tidak ditemukan",
       });
     }
+
+    const company = companyAgg[0];
+
 
     // =======================
     // 3️⃣ Ambil documents
@@ -289,25 +331,12 @@ exports.updateCompanyProfile = async (req, res) => {
 }
 
 const companyId = new ObjectId(user.company_id);
-
-
-    // if (!user || !user.company_id) {
-    //   return res.status(404).json({
-    //     message: "Company belum terdaftar",
-    //   });
-    // }
-
-    // const companyId = user.company_id;
-
-    // =======================
-    // 2️⃣ Ambil body
-    // =======================
     const {
       company_name,
       description,
       address,
       employee_range,
-      industry,
+      industry_id,
       company_email,
       company_phone,
       company_url,
@@ -315,13 +344,32 @@ const companyId = new ObjectId(user.company_id);
       city,
     } = req.body;
 
-    // =======================
-    // 3️⃣ Validasi minimal
-    // =======================
     if (!company_name || !company_email || !company_phone) {
       return res.status(400).json({
         message: "company_name, company_email, dan company_phone wajib diisi",
       });
+    }
+
+    let industryObjectId = null;
+
+    if (industry_id) {
+      if (!ObjectId.isValid(industry_id)) {
+        return res.status(400).json({
+          message: "industry_id tidak valid",
+        });
+      }
+
+      industryObjectId = new ObjectId(industry_id);
+
+      const industry = await industries.findOne({
+        _id: industryObjectId,
+      });
+
+      if (!industry) {
+        return res.status(400).json({
+          message: "Industry tidak ditemukan",
+        });
+      }
     }
 
     // =======================
@@ -333,7 +381,6 @@ const companyId = new ObjectId(user.company_id);
       address,
       province,
       city,
-      industry,
       employee_range: employee_range
         ? Number(employee_range)
         : null,
@@ -342,6 +389,10 @@ const companyId = new ObjectId(user.company_id);
       company_url,
       updated_at: new Date(),
     };
+
+    if (industryObjectId) {
+  updatePayload.industry_id = industryObjectId;
+  }
 
     // =======================
     // 5️⃣ Jika logo diupload → update logo
@@ -375,6 +426,7 @@ const companyId = new ObjectId(user.company_id);
   } catch (error) {
     return res.status(500).json({
       message: "Gagal memperbarui profil company",
+      error: error.message,
     });
   }
 };

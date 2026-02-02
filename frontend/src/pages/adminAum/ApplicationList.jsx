@@ -326,7 +326,7 @@ const ApplicationList = () => {
 
                   <button
                     onClick={() =>
-                      navigate("/admin-aum/lihat-pelamar", {
+                      navigate("/admin-aum/job/list-pelamar", {
                         state: { jobId: item._id, jobName: item.job_name},
                       })
                     }

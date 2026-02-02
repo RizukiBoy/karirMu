@@ -60,6 +60,24 @@ const DataAum = ({ formData = {}, setFormData, submitHandler, agree, setAgree })
   const [provinces, setProvinces] = useState([]);
   const [cities, setCities] = useState([]);
   const [loadingCity, setLoadingCity] = useState(false);
+  const [industries, setIndustries] = useState([]);
+  const [loadingIndustry, setLoadingIndustry] = useState(true);
+
+  useEffect(() => {
+    const fetchIndustries = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/industries");
+        setIndustries(res.data.data);
+      } catch (err) {
+        console.error("Gagal mengambil industry", err);
+      } finally {
+        setLoadingIndustry(false);
+      }
+    };
+
+    fetchIndustries();
+  }, []);
+
 
   // 1. Fetch Daftar Provinsi saat Mount
   useEffect(() => {
@@ -130,7 +148,7 @@ const DataAum = ({ formData = {}, setFormData, submitHandler, agree, setAgree })
     data.append("company_url", formData.company_url || "");
     data.append("description", formData.description || "");
     data.append("address", formData.address || "");
-    data.append("industry", formData.industry || "");
+    data.append("industry", formData.industry_id || "");
     data.append("employee_range", formData.employee_range || "");
 
     // Backend Anda minta JSON string
@@ -155,7 +173,7 @@ if (formData.logo instanceof File) {
     submitHandler(data)
     .then((res) => {
       // Jika sukses, redirect ke DetailProfilAum
-      navigate("/admin-aum/profil/detail", { state: { formData } }); 
+      navigate("/admin-aum/detail", { state: { formData } }); 
       // `state` bisa dipakai di DetailProfilAum untuk menampilkan data baru
     })
     .catch((err) => {
@@ -218,17 +236,33 @@ if (formData.logo instanceof File) {
             disabled={!formData.province || loadingCity}
           />
 
-          <Select
-            label="Bidang Industri"
-            placeholder="Pilih industri"
-            options={[
-              { label: "Teknologi", value: "Teknologi" },
-              { label: "Pendidikan", value: "Pendidikan" },
-              { label: "Kesehatan", value: "Kesehatan" },
-            ]}
-            value={formData.industry}
-            onChange={(e) => handleChange("industry", e.target.value)}
-          />
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700">
+              Industri <span className="text-red-500">*</span>
+            </label>
+
+            <select
+              value={formData.industry_id}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  industry_id: e.target.value,
+                })
+              }
+              className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+              disabled={loadingIndustry}
+            >
+              <option value="">
+                {loadingIndustry ? "Memuat industri..." : "Pilih Bidang Industri"}
+              </option>
+
+              {industries.map((item) => (
+                <option key={item._id} value={item._id}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <Select
             label="Jumlah Karyawan"

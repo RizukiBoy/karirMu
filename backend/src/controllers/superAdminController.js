@@ -8,6 +8,7 @@ const users = client.db("karirMu").collection("users");
 const companyHrd = client.db("karirMu").collection("company_hrd");
 const companies = client.db("karirMu").collection("companies")
 const companyDocuments = client.db("karirMu").collection("company_documents")
+const jobs = client.db("karirMu").collection("jobs");
 
 exports.addAdmin = async (req, res) => {
     try {
@@ -287,3 +288,107 @@ exports.getAdminAumDetail = async (req, res) => {
   }
 };
 
+exports.getAdminDashboardSummary = async (req, res) => {
+  try {
+
+    /* ===============================
+       1️⃣ MENUNGGU PERSETUJUAN AUM
+    =============================== */
+
+    const companyVerification = await companyDocuments.aggregate([
+      {
+        $group: {
+          _id: "$company_id",
+          total_documents: { $sum: 1 },
+          approved_count: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "approved"] }, 1, 0],
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          verification_status: {
+            $cond: [
+              { $eq: ["$approved_count", "$total_documents"] },
+              "approved",
+              "pending",
+            ],
+          },
+        },
+      },
+      {
+        $match: {
+          verification_status: "pending",
+        },
+      },
+      {
+        $count: "pending_approval",
+      },
+    ]).toArray();
+
+    const pendingApproval =
+      companyVerification.length > 0
+        ? companyVerification[0].pending_approval
+        : 0;
+
+    /* ===============================
+       2️⃣ TOTAL AUM AKTIF
+    =============================== */
+
+    const activeAum = await companies.countDocuments({
+      _id: {
+        $in: await companyDocuments.distinct("company_id", {
+          status: "approved",
+        }),
+      },
+    });
+
+    /* ===============================
+       3️⃣ TOTAL LOWONGAN
+    =============================== */
+
+    const totalJobs = await jobs.countDocuments();
+
+    /* ===============================
+       4️⃣ TOTAL PELAMAR
+    =============================== */
+
+    const totalApplicants = await users.countDocuments();
+
+    /* ===============================
+       RESPONSE
+    =============================== */
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        pending_approval: pendingApproval,
+        active_aum: activeAum,
+        total_jobs: totalJobs,
+        total_applicants: totalApplicants,
+      },
+    });
+
+  } catch (error) {
+    console.error("ERROR getAdminDashboardSummary:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Gagal mengambil ringkasan dashboard admin",
+    });
+  }
+};
+
+const activateJobsForCompany = async (companyId) => {
+  // cek apakah akun perusahaan sudah aktif
+  const company = await companies.findOne({ _id: companyId });
+
+  if (!company || !company.status) return; // jika belum active, skip
+
+  // update semua job milik company yang status false
+  await jobs.updateMany(
+    { company_id: companyId, status: false },
+    { $set: { status: true, updated_at: new Date() } }
+  );
+};

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -22,6 +22,7 @@ const STATUS_BADGE_MAP = {
 export default function PengajuanAum() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState("all");
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -51,6 +52,23 @@ export default function PengajuanAum() {
   useEffect(() => {
     fetchAdmins();
   }, [location.pathname]);
+
+  const filteredData = useMemo(() => {
+  if (activeFilter === "all") return data;
+
+  return data.filter(
+    (d) => d?.verification?.status === activeFilter
+  );
+}, [data, activeFilter]);
+
+
+const filters = [
+  { key: "all", label: "Semua" },
+  { key: "pending", label: "Pending" },
+  { key: "approved", label: "Diterima" },
+  { key: "rejected", label: "Ditolak" },
+];
+
 
   const getStatusUI = (verification) => {
     if (!verification || !verification.status) {
@@ -86,32 +104,42 @@ export default function PengajuanAum() {
         >
           Filter Status
         </div>
+<div className="bg-white rounded-b-xl shadow p-4">
+  <div className="flex gap-3 flex-wrap">
+    {filters.map((filter) => {
+      const count =
+        filter.key === "all"
+          ? data.length
+          : data.filter(
+              (d) => d?.verification?.status === filter.key
+            ).length;
 
-        <div className="bg-white rounded-b-xl shadow p-4">
-          <div className="flex gap-3 flex-wrap">
-            {[
-              `Semua (${data.length})`,
-              `Pending (${data.filter((d) => d?.verification?.status === "pending").length})`,
-              `Diterima (${data.filter((d) => d?.verification?.status === "approved").length})`,
-              `Ditolak (${data.filter((d) => d?.verification?.status === "rejected").length})`,
-            ].map((item) => (
-              <button
-                key={item}
-                className="
-                  px-5 py-2
-                  rounded-full
-                  border border-[#409144]
-                  text-[#409144]
-                  text-sm font-medium
-                  hover:bg-[#409144]/10
-                  transition
-                "
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-        </div>
+      const isActive = activeFilter === filter.key;
+
+      return (
+        <button
+          key={filter.key}
+          onClick={() => setActiveFilter(filter.key)}
+          className={`
+            px-5 py-2
+            rounded-full
+            border
+            text-sm font-medium
+            transition
+            ${
+              isActive
+                ? "bg-[#409144] text-white border-[#409144]"
+                : "border-[#409144] text-[#409144] hover:bg-[#409144]/10"
+            }
+          `}
+        >
+          {filter.label} ({count})
+        </button>
+      );
+    })}
+  </div>
+</div>
+
 
         {/* ================= TITLE LIST ================= */}
         <div
@@ -129,7 +157,7 @@ export default function PengajuanAum() {
             Tidak ada data pengajuan AUM
           </div>
         ) : (
-          data.map((item) => {
+          filteredData.map((item) => {
             const statusUI = getStatusUI(item.verification);
 
             return (
@@ -183,7 +211,7 @@ export default function PengajuanAum() {
                   <button
                     onClick={() =>
                       navigate(
-                        `/admin-super/detail-pengajuan-aum/${item.company_id}`
+                        `/pengajuan-aum/detail/${item.company_id}`
                       )
                     }
                     className="

@@ -8,6 +8,7 @@ const superAdminRoute = require("./routes/superAdminRoute")
 const jobRoutes = require("./routes/jobRoutes");
 const publicRoutes = require("./routes/publicRoutes")
 const jobFieldRoutes = require("./routes/jobFieldRoute");
+const industryRoutes = require("./routes/industryRoute")
 
 const app = express();
 app.use(express.json());
@@ -24,6 +25,7 @@ app.use(cors({
 }));
 
 app.use("/api/job-field", jobFieldRoutes)
+app.use("/api/industries", industryRoutes)
 app.use("/api/auth", authRoutes)
 app.use("/api/public", publicRoutes)
 app.use("/api/user", userRoutes)

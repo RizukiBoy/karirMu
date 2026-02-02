@@ -161,11 +161,10 @@ export default function ListLowongan() {
 {/* ================= DAFTAR LOWONGAN ================= */}
 
 {/* CARD TABLE */}
-<div className="bg-white rounded-b-lg shadow-sm p-6">
+{/* <div className="bg-white rounded-b-lg shadow-sm p-6">
 
-  {/* HEADER KOLOM */}
   <div
-    className="grid grid-cols-5 px-4 py-3 rounded-md text-sm font-semibold text-white mb-4"
+    className="grid grid-cols-5 px-4 py-3 rounded-md text-sm font-semibold text-white mb-4 overflow-x-scroll"
     style={{
       background: "linear-gradient(90deg, #1D5F82 0%, #409144 100%)",
     }}
@@ -180,7 +179,41 @@ export default function ListLowongan() {
 {jobs.map((job) => (
   <JobCard key={job._id} job={job} onClick={() => navigate(`/admin-aum/jobs/${job._id}`)} />
 ))}
+</div> */}
+
+<div className="bg-white rounded-b-lg shadow-sm p-6">
+
+  {/* ===== HEADER KOLOM (DESKTOP ONLY) ===== */}
+  <div
+    className="
+      hidden md:grid
+      grid-cols-5
+      px-4 py-3 rounded-md
+      text-sm font-semibold text-white mb-4
+    "
+    style={{
+      background: "linear-gradient(90deg, #1D5F82 0%, #409144 100%)",
+    }}
+  >
+    <div>Pekerjaan</div>
+    <div>Tipe pekerjaan</div>
+    <div>Tanggal Dibuat</div>
+    <div>Status</div>
+    <div>Aksi</div>
+  </div>
+
+  {/* ===== LIST ===== */}
+  <div className="space-y-3 md:space-y-0">
+    {jobs.map((job) => (
+      <JobCard
+        key={job._id}
+        job={job}
+        onClick={() => navigate(`/admin-aum/jobs/${job._id}`)}
+      />
+    ))}
+  </div>
 </div>
+
     {/* PAGINATION CARD */}
     <div className="bg-white rounded-lg shadow-sm px-6 py-4 flex justify-between items-center text-sm text-gray-600">
       <span>

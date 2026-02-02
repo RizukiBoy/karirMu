@@ -16,7 +16,7 @@ const {
     getWorkExperienceByUser,
 } = require("../controllers/userController");
 const roleMiddleware = require("../middleware/roleMiddleware");
-const { getAppliedJobsForUser } = require("../controllers/applyJobController");
+const { getAppliedJobsForUser, getApplicationStatsForUser } = require("../controllers/applyJobController");
 
 // get
 router.get("/profile" ,authMiddleware, roleMiddleware("pelamar"), getUserProfile);
@@ -26,6 +26,7 @@ router.get("/skill", authMiddleware, roleMiddleware("pelamar"), getUserSkills);
 router.get("/work-experience", authMiddleware, roleMiddleware("pelamar"), getWorkExperienceByUser);
 
 router.get("/applied-jobs", authMiddleware, roleMiddleware("pelamar"), getAppliedJobsForUser)
+router.get("/applied-stats", authMiddleware, roleMiddleware("pelamar"), getApplicationStatsForUser);
 
 
 

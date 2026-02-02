@@ -14,7 +14,7 @@ const EditProfileAum = ({
   const [logoFile, setLogoFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const [jobFields, setJobFields] = useState([]);
+  const [industry, setIndustry] = useState([]);
   const [provinces, setProvinces] = useState([]);
   const [cities, setCities] = useState([]);
 
@@ -28,7 +28,7 @@ const EditProfileAum = ({
         company_url: initialData.company_url || "",
         province: initialData.province || "",
         city: initialData.city || "",
-        industry: initialData.industry || "",
+        industry: initialData.industry_id|| "",
         employee_range: initialData.employee_range || "",
         description: initialData.description || "",
         address: initialData.address || "",
@@ -42,16 +42,16 @@ const EditProfileAum = ({
   useEffect(() => {
     if (!open) return;
 
-    const fetchJobFields = async () => {
+    const fetchIndustry = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/job-field/`);
-        setJobFields(res.data.data || []);
+        const res = await axios.get(`http://localhost:5000/api/industries/`);
+        setIndustry(res.data.data || []);
       } catch (err) {
         console.error("Gagal fetch job field:", err);
       }
     };
 
-    fetchJobFields();
+    fetchIndustry();
   }, [open]);
 
   /* ================= FETCH PROVINCES ================= */
@@ -97,6 +97,10 @@ const EditProfileAum = ({
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleChangeEmployee = (key, value) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+  };
+
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -105,27 +109,32 @@ const EditProfileAum = ({
     }
   };
 
-  const handleSave = async () => {
-    if (loading) return;
+const handleSave = async () => {
+  if (loading) return;
 
-    setLoading(true);
-    try {
-      const payload = new FormData();
-      Object.entries(formData).forEach(([k, v]) => {
-        if (v !== undefined && v !== null) payload.append(k, v);
-      });
+  setLoading(true);
+  try {
+    const payload = new FormData();
 
-      if (logoFile) payload.append("logo", logoFile);
+    Object.entries(formData).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) {
+        payload.append(k, v);
+      }
+    });
 
-      await axios.put(
-        "http://localhost:5000/api/admin-aum/company/edit-profile",
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
-      );
+    if (logoFile) {
+      payload.append("logo", logoFile);
+    }
+
+    const res = await axios.put(
+      "http://localhost:5000/api/admin-aum/company/edit-profile",
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      }
+    );
 
     const updated = res.data?.data || {
       ...initialData,
@@ -133,15 +142,15 @@ const EditProfileAum = ({
       logo_url: previewLogo || initialData.logo_url,
     };
 
-    onSuccess(updated);
+    onSuccess();
+  } catch (err) {
+    console.error("Gagal update profil:", err);
+  } finally {
+    setLoading(false);
     onClose();
+  }
+};
 
-    } catch (err) {
-      console.error("Gagal update profil:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (!open) return null;
 
@@ -220,14 +229,36 @@ const EditProfileAum = ({
               ))}
             </Select>
 
-            <Select label="Bidang Industri" name="industry" value={formData.industry || ""} onChange={handleChange}>
+            <Select
+              label="Bidang Industri"
+              name="industry_id"
+              value={formData.industry_id || ""}
+              onChange={handleChange}
+            >
               <option value="">Pilih Industri</option>
-              {jobFields.map(j => (
-                <option key={j._id} value={j.name}>{j.name}</option>
+              {industry.map((j) => (
+                <option key={j._id} value={j._id}>
+                  {j.name}
+                </option>
               ))}
             </Select>
 
-            <Input label="Jumlah Karyawan" name="employee_range" value={formData.employee_range || ""} onChange={handleChange} />
+
+          <SelectEmployee
+            label="Jumlah Karyawan"
+            placeholder="Pilih jumlah"
+            options={[
+              { label: "1 - 10", value: "1" },
+              { label: "11 - 50", value: "11" },
+              { label: "51 - 200", value: "51" },
+              { label: "200+", value: "201" },
+            ]}
+            value={formData.employee_range}
+            onChange={(e) => handleChangeEmployee("employee_range", e.target.value)}
+          />
+
+
+
 
             <div className="md:col-span-2">
               <label className="text-gray-500 text-xs">Deskripsi</label>
@@ -295,6 +326,25 @@ const Select = ({ label, children, ...props }) => (
     <select {...props} className="w-full border rounded px-3 py-2 text-sm">
       {children}
     </select>
+  </div>
+);
+
+const SelectEmployee = ({ label, placeholder, options = [], value, onChange, disabled }) => (
+  <div className="w-full">
+    <label className="text-[13px] font-medium text-gray-700">{label}</label>
+    <div className="flex items-center h-10.5 bg-[#F2F4F8] rounded-sm px-4 mt-1">
+      <select
+        value={value || ""}
+        onChange={onChange}
+        disabled={disabled}
+        className="w-full bg-transparent text-sm outline-none"
+      >
+        <option value="" disabled>{placeholder}</option>
+        {options.map((opt, i) => (
+          <option key={i} value={opt.value}>{opt.label}</option>
+        ))}
+      </select>
+    </div>
   </div>
 );
 

@@ -22,6 +22,7 @@ const BuatLowongan = () => {
   const [address, setAddress ] = useState("");
 
   const [showConfirm, setShowConfirm] = useState(false);
+  const [errors, setErrors] = useState({})
 
   useEffect(() => {
     const fetchJobFields = async () => {
@@ -51,10 +52,47 @@ const BuatLowongan = () => {
     setSalaryMax(formatRupiah(raw));
   };
 
+const validate = () => {
+  const newErrors = {};
+
+  if (!jobName.trim()) {
+    newErrors.jobName = "Nama lowongan wajib diisi";
+  }
+
+  if (!dateJob) {
+    newErrors.dateJob = "Tenggat waktu wajib diisi";
+  } else {
+    const selected = new Date(dateJob);
+    selected.setHours(0,0,0,0);
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    if (selected < today) {
+      newErrors.dateJob = "Tenggat tidak boleh kurang dari hari ini";
+    }
+  }
+
+  if (salaryMin && salaryMax) {
+    const min = Number(salaryMin.replace(/\./g,""));
+    const max = Number(salaryMax.replace(/\./g,""));
+
+    if (min > max) {
+      newErrors.salaryMax = "Gaji maksimum harus ≥ gaji minimum";
+    }
+  }
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
+
+
   const token = localStorage.getItem("accessToken")
 
   const handleSubmit = async () => {
     try {
+      if(!validate()) return;
+
       const payload = {
         job_field_id: bidang,
         job_name: jobName,
@@ -67,7 +105,6 @@ const BuatLowongan = () => {
         description,
         requirement,
         date_job: dateJob,
-        status: true,
       };
 
 const res = await axios.post(
@@ -117,6 +154,13 @@ const res = await axios.post(
             <div className="px-8">
               <hr className="border-gray-200" />
             </div>
+
+
+                    {errors.dateJob && (
+                      <p className="text-sm text-red-600 mt-1 flex justify-center">
+                        {errors.dateJob}
+                      </p>
+                    )}
 
             <div className="px-6 py-5 flex gap-4">
               <button
@@ -283,11 +327,14 @@ const res = await axios.post(
 
                   <Input
                     type="date"
-                    className="h-10 box-border appearance-none"
                     value={dateJob}
                     onChange={(e) => setDateJob(e.target.value)}
-                  />
-                </div>
+                    className={`
+                      h-10
+                      ${errors.dateJob ? "border-red-500 focus:ring-red-500" : ""}
+                    `}
+                    />
+                 </div>
               </div>
             </div>
           </div>
@@ -324,7 +371,7 @@ const Header = ({ title }) => (
   </div>
 );
 
-const Input = ({ label, placeholder, type = "text", icon, className, value, onChange }) => (
+const Input = ({ label, placeholder, type = "text", icon, className, value, onChange, props }) => (
   <div>
     {label && <label className="text-xs text-gray-600">{label}</label>}
     <div className="relative mt-1">
@@ -333,6 +380,7 @@ const Input = ({ label, placeholder, type = "text", icon, className, value, onCh
         placeholder={placeholder}
         value={value}
         onChange={onChange}
+        {...props}
         className={`w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-0 box-border ${className || ""}`}
       />
       {icon && <span className="absolute right-3 top-2.5">{icon}</span>}

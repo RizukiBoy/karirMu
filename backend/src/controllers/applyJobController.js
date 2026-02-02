@@ -236,8 +236,6 @@ exports.getAppliedJobsForUser = async (req, res) => {
   }
 };
 
-
-
 exports.updateApplication = async (req, res) => {
   try {
     if (!req.user) {
@@ -321,5 +319,130 @@ exports.updateApplication = async (req, res) => {
   } catch (error) {
     console.error("ERROR updateApplication:", error);
     return res.status(500).json({ message: "Gagal update lamaran" });
+  }
+};
+
+exports.getApplicationStatsForUser = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const stats = await apply_jobs.aggregate([
+      {
+        $match: {
+          user_id: new ObjectId(userId),
+        },
+      },
+      {
+        $group: {
+          _id: "$apply_status",
+          total: { $sum: 1 },
+        },
+      },
+    ]).toArray();
+
+    // normalisasi ke object biar gampang dipakai frontend
+    const result = {
+      total: 0,
+      review: 0,
+      accepted: 0,
+    };
+
+    stats.forEach((item) => {
+      result.total += item.total;
+
+      if (item._id === "reviewed") {
+        result.review = item.total;
+      }
+
+      if (item._id === "accepted") {
+        result.accepted = item.total;
+      }
+    });
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Gagal mengambil statistik lamaran",
+    });
+  }
+};
+
+exports.getApplicantsByJob = async (req, res) => {
+  try {
+    const { jobId } = req.params;
+
+    // ======================
+    // 1️⃣ Validasi jobId
+    // ======================
+    if (!ObjectId.isValid(jobId)) {
+      return res.status(400).json({
+        message: "Job ID tidak valid",
+      });
+    }
+
+    const jobObjectId = new ObjectId(jobId);
+
+    // ======================
+    // 2️⃣ Aggregation lookup
+    // ======================
+    const applicants = await apply_jobs
+      .aggregate([
+        {
+          $match: {
+            job_id: jobObjectId,
+          },
+        },
+        {
+          $lookup: {
+            from: "users", // atau "profiles"
+            localField: "user_id",
+            foreignField: "_id",
+            as: "user",
+          },
+        },
+        {
+          $unwind: {
+            path: "$user",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            status: 1,
+            created_at: 1,
+
+            full_name: "$user.full_name",
+            email: "$user.email",
+            phone: "$user.phone",
+          },
+        },
+        {
+          $sort: {
+            created_at: -1,
+          },
+        },
+      ])
+      .toArray();
+
+    // ======================
+    // 3️⃣ Response
+    // ======================
+    return res.json({
+      message: "List pelamar berdasarkan lowongan",
+      total: applicants.length,
+      data: applicants,
+    });
+  } catch (error) {
+    console.error("ERROR getApplicantsByJob:", error);
+    return res.status(500).json({
+      message: "Gagal mengambil data pelamar",
+      error: error.message,
+    });
   }
 };

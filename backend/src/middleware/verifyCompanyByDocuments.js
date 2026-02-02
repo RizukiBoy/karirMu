@@ -31,3 +31,5 @@ module.exports = async function verifyCompanyByDocuments(
     res.status(500).json({ message: "Server error" });
   }
 };
+
+

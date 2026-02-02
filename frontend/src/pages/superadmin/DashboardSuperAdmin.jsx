@@ -1,3 +1,5 @@
+import { useState, useEffect} from "react";
+import axios from "axios";
 import AdminSuperLayout from "../../components/layout/SuperAdminLayout";
 
 // ICONSAX
@@ -9,44 +11,48 @@ import {
 } from "iconsax-reactjs";
 
 const DashboardAdminSuper = () => {
+  const [summary, setSummary] = useState({
+    pending_approval: 0,
+    active_aum: 0,
+    total_jobs: 0,
+    total_applicants: 0,
+  })
+
+  const [loadingSummary, setLoadingSummary] = useState(true);
+  const [errorSummary, setErrorSummary] = useState(null);
+
+
+useEffect(() => {
+  const fetchDashboardSummary = async () => {
+    try {
+      setLoadingSummary(true);
+
+      const res = await axios.get(
+        "http://localhost:5000/api/admin/dashboard/",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+
+      setSummary(res.data.data);
+      console.log(res.data.data)
+    } catch (error) {
+      console.error("Gagal fetch dashboard summary:", error);
+      setErrorSummary("Gagal memuat data dashboard");
+    } finally {
+      setLoadingSummary(false);
+    }
+  };
+
+  fetchDashboardSummary();
+}, []);
+
+
   return (
     <AdminSuperLayout>
       <div className="space-y-6">
-
-        {/* ===============================
-            RINGKASAN AKTIVITAS SISTEM
-        =============================== */}
-        <div
-          className="px-4 py-3 rounded-t-lg font-medium text-white"
-          style={{
-            background: "linear-gradient(90deg, #004F8F 0%, #009B49 100%)",
-          }}
-        >
-          Ringkasan Aktifitas Sistem
-        </div>
-
-        {/* CARD FILTER */}
-        <div className="bg-white rounded-b-xl shadow p-4">
-          <div className="flex gap-3">
-            {["Semua", "Admin Aum", "Pelamar"].map((item) => (
-              <button
-                key={item}
-                className="
-                  px-6 py-2
-                  rounded-full
-                  border border-[#409144]
-                  text-[#409144]
-                  text-sm font-medium
-                  hover:bg-[#409144]/10
-                  transition
-                "
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* ===============================
             INDIKATOR UTAMA
         =============================== */}
@@ -67,7 +73,9 @@ const DashboardAdminSuper = () => {
             <div className="w-10 h-10 bg-[#409144] rounded-full flex items-center justify-center">
               <Profile2User size="20" color="#fff" variant="Bold" />
             </div>
-            <p className="text-2xl font-bold">12</p>
+            <p className="text-2xl font-bold">
+              {loadingSummary ? "-" : summary.pending_approval}
+            </p>
             <p className="text-sm text-gray-600">
               Menunggu Persetujuan
             </p>
@@ -78,7 +86,9 @@ const DashboardAdminSuper = () => {
             <div className="w-10 h-10 bg-[#409144] rounded-full flex items-center justify-center">
               <UserTick size="20" color="#fff" variant="Bold" />
             </div>
-            <p className="text-2xl font-bold">25</p>
+            <p className="text-2xl font-bold">
+              {loadingSummary ? "-" : summary.active_aum}
+            </p>
             <p className="text-sm text-gray-600">
               Total AUM Aktif
             </p>
@@ -89,7 +99,9 @@ const DashboardAdminSuper = () => {
             <div className="w-10 h-10 bg-[#409144] rounded-full flex items-center justify-center">
               <DocumentText size="20" color="#fff" variant="Bold" />
             </div>
-            <p className="text-2xl font-bold">55</p>
+            <p className="text-2xl font-bold">
+              {loadingSummary ? "-" : summary.total_jobs}
+            </p>
             <p className="text-sm text-gray-600">
               Total Lowongan
             </p>
@@ -100,7 +112,9 @@ const DashboardAdminSuper = () => {
             <div className="w-10 h-10 bg-[#409144] rounded-full flex items-center justify-center">
               <Profile2User size="20" color="#fff" variant="Bold" />
             </div>
-            <p className="text-2xl font-bold">150</p>
+            <p className="text-2xl font-bold">
+              {loadingSummary ? "-" : summary.total_applicants}
+            </p>
             <p className="text-sm text-gray-600">
               Total Pelamar
             </p>

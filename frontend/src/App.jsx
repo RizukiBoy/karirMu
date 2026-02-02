@@ -48,6 +48,9 @@ import SavedJobs from "./pages/pelamar/SavedJobs";
 import PengajuanAum from "./pages/superadmin/PengajuanAum";
 import Education from "./pages/pelamar/Education";
 import ProfileForm from "./components/users/ProfileForm";
+import DetailPengajuanAum from "./pages/superadmin/DetailPengajuanAum";
+import Industries from "./pages/superadmin/Industries";
+import ListPelamarByJob from "./components/adminAum/ListPelamarByJob";
 
 function App() {
   const location = useLocation();
@@ -95,6 +98,7 @@ function App() {
           <Route path="/admin-aum/list-pelamar" element={<ApplicationList />} />
           <Route path="/admin-aum/list-pelamar/:applyId" element={<ApplicationDetail />} />
           <Route path="/admin-aum/jobs/:jobId" element={<JobDetailPage />} />
+          <Route path="/admin-aum/job/list-pelamar" element={<ListPelamarByJob />} />
 
 
 
@@ -111,8 +115,10 @@ function App() {
         <Route path="/super-admin/login" element={<LoginAdmin />} />
         <Route path="/super-admin/dashboard" element={<DashboardSuperAdmin />} />
         <Route path="/super-admin/pengajuan-aum" element={<PengajuanAum />} />
-        <Route path="/super-admin/detail/:companyId" element={<AdminAumDetail />} />
-        <Route path="/job-field" element={<JobFields />} />
+        <Route path="/pengajuan-aum/detail/:companyId" element={<DetailPengajuanAum />} />
+        <Route path="/super-admin/job-field" element={<JobFields />} />
+        <Route path="/super-admin/industries" element={<Industries />} />
+
 
 
       </Routes>

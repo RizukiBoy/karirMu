@@ -8,6 +8,7 @@ import {
   Profile2User,
   Menu,
   CloseCircle,
+  AddCircle,
 } from "iconsax-reactjs";
 
 const SidebarSuperAdmin = () => {
@@ -115,10 +116,10 @@ const SidebarSuperAdmin = () => {
           />
 
           <SidebarItem
-            icon={Profile2User}
-            text="Manajemen User"
-            active={isActive("/super-admin/manajemen-user")}
-            onClick={() => navigate("/super-admin/manajemen-user")}
+            icon={AddCircle}
+            text="Kelola Bidang"
+            active={isActive("/super-admin/job-field")}
+            onClick={() => navigate("/super-admin/job-field")}
           />
         </ul>
       </aside>

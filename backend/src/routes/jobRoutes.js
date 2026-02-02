@@ -14,7 +14,7 @@ const {
     checkSavedJob
 } = require("../controllers/jobController");
 const companyMiddleware = require("../middleware/companyMiddleware");
-const { getApplicantDetailForCompany, updateApplication } = require("../controllers/applyJobController");
+const { getApplicantDetailForCompany, updateApplication, getApplicantsByJob } = require("../controllers/applyJobController");
 const verifyCompanyByDocuments = require("../middleware/verifyCompanyByDocuments");
 
 // post
@@ -39,7 +39,7 @@ router.post(
   roleMiddleware("pelamar"),
   applyJob
 );
-
+router.get("/job/:jobId/list-applicants", authMiddleware, roleMiddleware("company_hrd"), getApplicantsByJob)
 router.get("/applications/:applyId", authMiddleware, roleMiddleware("company_hrd"), getApplicantDetailForCompany);
 router.patch("/applications/:applyId", authMiddleware, roleMiddleware("company_hrd"), updateApplication)
 

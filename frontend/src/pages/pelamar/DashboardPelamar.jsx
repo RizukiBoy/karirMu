@@ -36,6 +36,32 @@ const rekomendasiLowongan = [
 const DashboardPelamar = () => {
   const [loading, setLoading] = useState(true)
   const [jobs, setJobs] = useState([])
+  const [stats, setStats] = useState({
+    total: 0,
+    review: 0,
+    accepted: 0,
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/user/applied-stats", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
+
+        setStats(res.data.data);
+        console.log(res.data.data)
+      } catch (err) {
+        console.error("Gagal ambil statistik", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
     useEffect(() => {
     const fetchJobs = async () => {
@@ -69,15 +95,6 @@ const DashboardPelamar = () => {
         </div>
 
         {/* ================= STATISTIK ================= */}
-        <div
-          className="px-4 py-3 rounded-t-2xl font-medium text-white"
-          style={{
-            background: "linear-gradient(90deg, #004F8F 0%, #009B49 100%)",
-          }}
-        >
-          Statistik Lamaran
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* TOTAL LAMARAN */}
           <div className="bg-white rounded-xl shadow-sm w-full max-w-361px h-216px mx-auto p-6 flex flex-col">
@@ -98,9 +115,9 @@ const DashboardPelamar = () => {
 
             {/* CONTENT */}
             <div className="mt-4 ml-6 text-left">
-              <h3 className="text-3xl font-bold text-gray-800">
-                12
-              </h3>
+            <h3 className="text-3xl font-bold text-gray-800">
+              {loading ? "-" : stats.total}
+            </h3>
               <p className="text-lg font-medium text-gray-700 mt-1">
                 Total Lamaran
               </p>
@@ -126,9 +143,9 @@ const DashboardPelamar = () => {
             </div>
 
             <div className="mt-4 ml-6 text-left">
-              <h3 className="text-3xl font-bold text-gray-800">
-                5
-              </h3>
+            <h3 className="text-3xl font-bold text-gray-800">
+              {loading ? "-" : stats.review}
+            </h3>
               <p className="text-lg font-medium text-gray-700 mt-1">
                 Sedang Ditinjau
               </p>
@@ -154,9 +171,9 @@ const DashboardPelamar = () => {
             </div>
 
             <div className="mt-4 ml-6 text-left">
-              <h3 className="text-3xl font-bold text-gray-800">
-                2
-              </h3>
+            <h3 className="text-3xl font-bold text-gray-800">
+              {loading ? "-" : stats.accepted}
+            </h3>
               <p className="text-lg font-medium text-gray-700 mt-1">
                 Lolos Seleksi
               </p>

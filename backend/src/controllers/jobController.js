@@ -65,7 +65,6 @@ exports.createJobs = async (req, res) => {
         description,
         requirement,
         date_job,
-        status,
       } = req.body;
 
       // =======================
@@ -145,7 +144,7 @@ exports.createJobs = async (req, res) => {
         description,
         requirement,
         date_job: parsedDate,
-        status: typeof status === "boolean" ? status : true,
+        status: false,
         created_by: userObjectId,
         created_at: new Date(),
         updated_at: new Date(),
@@ -1088,6 +1087,16 @@ exports.getApplyJobsForCompany = async (req, res) => {
 
     const companyId = user.company_id;
 
+    const { jobId } = req.query;
+
+        let jobObjectId = null;
+    if (jobId) {
+      if (!ObjectId.isValid(jobId)) {
+        return res.status(400).json({ message: "Job ID tidak valid" });
+      }
+      jobObjectId = new ObjectId(jobId);
+    }
+
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 5));
     const skip = (page -1) * limit;
@@ -1095,8 +1104,19 @@ exports.getApplyJobsForCompany = async (req, res) => {
     // =======================
     // 2️⃣ AGGREGATION (BENAR)
     // =======================
-      const pipeline = [
-      // join ke jobs
+      const pipeline = []
+
+
+      if (jobObjectId) {
+      pipeline.push({
+        $match: {
+          job_id: jobObjectId,
+        },
+      });
+    }
+
+    pipeline.push(
+
       {
         $lookup: {
           from: "jobs",
@@ -1107,14 +1127,12 @@ exports.getApplyJobsForCompany = async (req, res) => {
       },
       { $unwind: "$job" },
 
-      // filter by company
+
       {
         $match: {
           "job.company_id": companyId,
         },
       },
-
-      // join ke users (pelamar)
       {
         $lookup: {
           from: "users",
@@ -1123,8 +1141,9 @@ exports.getApplyJobsForCompany = async (req, res) => {
           as: "applicant",
         },
       },
-      { $unwind: "$applicant" },
-      ]
+      { $unwind: "$applicant" }
+    );
+
 
       const countPipeline = [
         ...pipeline,

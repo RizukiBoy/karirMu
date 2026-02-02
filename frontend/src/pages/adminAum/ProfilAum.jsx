@@ -16,7 +16,7 @@ const ProfilAum = () => {
     company_url: "",
     province: "",
     city: "",
-    industry: "",
+    industry_id: "",
     employee_range: "",
     description: "",
     address: "",
@@ -51,7 +51,7 @@ const ProfilAum = () => {
 
         if (company && company._id) {
           // Jika profil sudah ada, redirect ke DetailProfilAum
-          navigate("/admin-aum/detail");
+          navigate("/admin-aum/detail", { replace: true});
         } else {
           setLoading(false); // Profil belum ada → tampilkan form
         }
@@ -89,7 +89,14 @@ const ProfilAum = () => {
 
   };
 
+if (loading) {
   return (
+    <div className="min-h-screen flex items-center justify-center">
+      <span className="text-sm text-gray-500">Memeriksa data perusahaan...</span>
+    </div>
+  );
+}
+    return (
     <AdminAumLayout>
       <div className="w-full px-4 py-6 flex justify-center">
         <div className="w-full max-w-1400px">
@@ -118,6 +125,7 @@ const ProfilAum = () => {
       </div>
     </AdminAumLayout>
   );
+
 };
 
 export default ProfilAum;

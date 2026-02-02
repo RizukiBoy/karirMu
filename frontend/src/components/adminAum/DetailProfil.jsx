@@ -191,7 +191,7 @@ const handleSave = async () => {
           <Input label="Website" name="company_url" value={formData.company_url} onChange={handleChange} />
           <Input label="Provinsi" name="province" value={formData.province} onChange={handleChange} />
           <Input label="Kota / Kabupaten" name="city" value={formData.city} onChange={handleChange} />
-          <Input label="Bidang Industri" name="industry" value={formData.industry} onChange={handleChange} />
+          <Input label="Bidang Industri" name="industry" value={formData._id} onChange={handleChange} />
           <Input label="Jumlah Karyawan" name="employee_range" value={formData.employee_range} onChange={handleChange} />
 
           <div className="md:col-span-2">

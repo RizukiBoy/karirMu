@@ -310,16 +310,58 @@ const handleSave = async () => {
             <div>
               <p className="font-semibold">{job.job_name}</p>
             </div>
-            <div className="grid grid-cols-1 gap-y-2 gap-x-6">
-              <p><span className="text-gray-500">Tipe Kerja</span> : {formatJobType(job.type)}</p>
-              <p><span className="text-gray-500">Lokasi</span> : {job.location}</p>
-              <p><span className="text-gray-500">Tipe Pekerjaan</span> : {formatWorkType(job.work_type)}</p>
-              <p>
-                <span className="text-gray-500">Bidang </span> :{" "}
-                {job.job_field?.name || job.job_field_name || "-"}
-              </p>
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-            </div>
+  {/* KOLOM KIRI */}
+  <div className="grid grid-cols-2 gap-x-4">
+    <div className="text-gray-500 space-y-2">
+      <p>Tipe Kerja</p>
+      <p>Lokasi</p>
+      <p>Tipe Pekerjaan</p>
+    </div>
+
+    <div className="space-y-2">
+      <p>: {formatJobType(job.type)}</p>
+      <p>: {job.location}</p>
+      <p>: {formatWorkType(job.work_type)}</p>
+    </div>
+  </div>
+
+  {/* KOLOM KANAN — DISAMAKAN */}
+  <div className="grid grid-cols-2 gap-x-4">
+    <div className="text-gray-500 space-y-2">
+      <p>Bidang</p>
+      <p>Rentang Gaji</p>
+      <p>Tenggat Waktu</p>
+    </div>
+
+    <div className="space-y-2">
+      <p>
+        : {job.job_field?.name || job.job_field_name || "-"}
+      </p>
+
+      <p className="">
+        : {job.salary_min && job.salary_max
+          ? `Rp ${Number(job.salary_min).toLocaleString("id-ID")} - Rp ${Number(
+              job.salary_max
+            ).toLocaleString("id-ID")}`
+          : "Dirahasiakan"}
+      </p>
+
+      <p>
+        : {job?.created_at
+          ? new Intl.DateTimeFormat("id-ID", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            }).format(new Date(job.created_at))
+          : "-"}
+      </p>
+    </div>
+  </div>
+
+</div>
+
           </div>
 
           {/* DESKRIPSI */}
@@ -340,31 +382,6 @@ const handleSave = async () => {
           </div>
           <div className="bg-white rounded-b-lg p-4 shadow-sm text-sm space-y-2">
             {job.requirement}
-          </div>
-
-          {/* RENTANG GAJI */}
-          <div className="px-4 py-3 rounded-t-lg font-medium text-white"
-            style={{ background: "linear-gradient(90deg, #004F8F 0%, #009B49 100%)" }}
-          >
-            Rentang Gaji & Tenggat Waktu
-          </div>
-          <div className="bg-white rounded-b-lg p-4 shadow-sm text-sm space-y-2">
-            <p>
-            <span className="text-gray-500">Rentang Gaji</span> :{" "}
-            {job.salary_min && job.salary_max
-              ? `Rp ${Number(job.salary_min).toLocaleString("id-ID")} - Rp ${Number(job.salary_max).toLocaleString("id-ID")}`
-              : "Dirahasiakan"}
-          </p>
-
-            
-            <p><span className="text-gray-500">Tenggat Waktu</span> : {" "}
-              {job?.created_at ? new Intl.DateTimeFormat("id-ID", {
-                day : "2-digit",
-                month: "long",
-                year: "numeric"
-              }).format(new Date(job?.created_at)): "-"}
-            </p>
-                         
           </div>
 
           {/* BUTTON ACTION */}
