@@ -62,7 +62,6 @@ function App() {
 
   return (
     <>
-      {!hideNavbarFooter && <Navbar />}
 
       <Routes>
         <Route path="/" element={<Home />} />
@@ -83,7 +82,7 @@ function App() {
         <Route path="/jobs/:jobId/apply" element={<ApplyJobPage />} />
         <Route path="/cari-lowongan" element={<CariLowongan />} />
         <Route path="/user/history-jobs" element={<HistoryJobs />} />
-        <Route path="user/saved-jobs" element={<SavedJobs />} />
+        <Route path="/user/saved-jobs" element={<SavedJobs />} />
         </Route>
 
 
@@ -123,7 +122,6 @@ function App() {
 
       </Routes>
 
-      {!hideNavbarFooter && <Footer />}
     </>
   );
 }

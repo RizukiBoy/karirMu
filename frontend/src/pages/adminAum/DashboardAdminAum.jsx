@@ -160,11 +160,6 @@ const DashboardAdminAum = () => {
                   </div>
                   <img src={iconUser} alt="icon" className="w-60px h-60px" />
                 </div>
-
-                <div className="flex items-center gap-2 text-xs text-green-500 mt-4 font-semibold">
-                  <img src={iconTrending} alt="trend" className="w-4 h-4" />
-                  8.5% Up from yesterday
-                </div>
               </div>
             ))}
           </div>

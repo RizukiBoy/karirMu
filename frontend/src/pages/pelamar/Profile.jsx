@@ -382,7 +382,7 @@ const step3Complete = Boolean(
 
   return (
     <PelamarLayout>
-    <div className="max-w-6xl mx-auto space-y-6 pb-24">
+    <div className="max-w-6xl mx-auto space-y-6 pb-24 ml-4">
 
       {/* ===== Stepper ===== */}
     <ProfileStepper

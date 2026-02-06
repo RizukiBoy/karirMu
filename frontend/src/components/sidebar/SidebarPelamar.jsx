@@ -114,7 +114,7 @@ const SidebarPelamar = () => {
       {isMobile && open && (
         <div
           onClick={() => setOpen(false)}
-          className="fixed inset-0 bg-black/40 z-40"
+          className="fixed inset-0 top-16 bottom-0 bg-black/40 z-40"
         />
       )}
 

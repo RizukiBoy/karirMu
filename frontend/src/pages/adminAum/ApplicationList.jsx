@@ -5,12 +5,7 @@ import axios from "axios";
 import AdminLayout from "../../components/layout/AdminAumLayout";
 
 // ICON
-import iconText from "../../assets/icons/ProfilAum/Icon-text.svg";
-import iconProfile from "../../assets/icons/ProfilAum/Icon-profile.svg";
-
-const gradientStyle = {
-  background: "linear-gradient(90deg, #004F8F 0%, #009B49 100%)",
-};
+import { DocumentText, Profile2User } from "iconsax-reactjs";
 
 const ApplicationList = () => {
   const navigate = useNavigate();
@@ -49,9 +44,6 @@ const ApplicationList = () => {
 
         setApplications(res.data.data || []);
         setTotal(res.data.total)
-        // console.log(res.data.data)
-        // console.log(res.data.total)
-
       } catch (error) {
         console.error("Gagal mengambil lamaran:", error);
       } finally {
@@ -137,16 +129,35 @@ const ApplicationList = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             {[
-              { icon: iconText, total: stats.total_jobs, label: "Total Lowongan" },
-              { icon: iconText, total: stats.total_applicants, label: "Total Pelamar" },
-              { icon: iconProfile, total: stats.submitted, label: "Perlu Ditinjau" },
-              { icon: iconProfile, total: stats.accepted, label: "Diterima" },
-            ].map((item, i) => (
+                {
+                  icon: <DocumentText size="24" variant="Bold" color="#004F8F" />,
+                  total: stats.total_jobs,
+                  label: "Total Lowongan",
+                },
+                {
+                  icon: <DocumentText size="24" variant="Bold" color="#009B49" />,
+                  total: stats.total_applicants,
+                  label: "Total Pelamar",
+                },
+                {
+                  icon: <Profile2User size="24" variant="Bold" color="#004F8F" />,
+                  total: stats.submitted,
+                  label: "Perlu Ditinjau",
+                },
+                {
+                  icon: <Profile2User size="24" variant="Bold" color="#009B49" />,
+                  total: stats.accepted,
+                  label: "Diterima",
+                },
+              ].map((item, i) => (
               <div
                 key={i}
                 className="bg-white rounded-lg shadow-sm p-4 flex gap-4"
               >
-                <img src={item.icon} className="w-10 h-10" alt="" />
+                <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-100">
+                  {item.icon}
+                </div>
+
                 <div>
                   <h3 className="text-xl font-bold">{item.total}</h3>
                   <p className="text-gray-500 text-sm">{item.label}</p>

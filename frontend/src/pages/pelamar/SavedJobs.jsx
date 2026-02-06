@@ -33,7 +33,7 @@ const SavedJobs = () => {
 
   return (
     <PelamarLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 ml-4">
         {/* HEADER */}
         <div
           className="px-4 py-3 rounded-t-2xl font-medium text-white"
@@ -64,7 +64,7 @@ const SavedJobs = () => {
                 key={item._id}
                 job={{
                   ...item.job,
-                  company: item.job.company,
+                  company: item.company,
                 }}
               />
             ))}

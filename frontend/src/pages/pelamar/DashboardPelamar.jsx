@@ -13,6 +13,19 @@ import iconArrowRight from "../../assets/icons/ProfilPelamar/arrow-right.svg";
 import iconSavePelamar from "../../assets/icons/ProfilPelamar/save.svg";
 import PublicJobCard from "../../components/users/PublicJobCard"
 
+import {
+  Text,
+  SecuritySafe,
+  ClipboardTick,
+  TickCircle,
+  Location,
+  User,
+  ArrowRight2,
+  Save2,
+  ArchiveBook,
+} from "iconsax-reactjs";
+
+
 const rekomendasiLowongan = [
   {
     posisi: "UI/UX Designer",
@@ -82,7 +95,7 @@ const DashboardPelamar = () => {
 
   return (
     <PelamarLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 ml-4">
 
         {/* ================= HEADER ================= */}
         <div
@@ -105,11 +118,7 @@ const DashboardPelamar = () => {
                 className="ml-8 w-11 h-11 rounded-full flex items-center justify-center"
                 style={{ backgroundColor: "#409144" }}
               >
-                <img
-                  src={iconTextPelamar}
-                  alt="total"
-                  className="w-5 h-5"
-                />
+                <ArchiveBook color="#ffffff" />
               </div>
             </div>
 
@@ -121,9 +130,6 @@ const DashboardPelamar = () => {
               <p className="text-lg font-medium text-gray-700 mt-1">
                 Total Lamaran
               </p>
-              <span className="text-xs text-blue-600">
-                +12% from yesterday
-              </span>
             </div>
           </div>
 
@@ -134,11 +140,7 @@ const DashboardPelamar = () => {
                 className="ml-8 w-11 h-11 rounded-full flex items-center justify-center"
                 style={{ backgroundColor: "#409144" }}
               >
-                <img
-                  src={iconSecurityPelamar}
-                  alt="review"
-                  className="w-5 h-5"
-                />
+                <SecuritySafe color="#ffffff"/>
               </div>
             </div>
 
@@ -149,9 +151,6 @@ const DashboardPelamar = () => {
               <p className="text-lg font-medium text-gray-700 mt-1">
                 Sedang Ditinjau
               </p>
-              <span className="text-xs text-blue-600">
-                +5% from yesterday
-              </span>
             </div>
           </div>
 
@@ -162,11 +161,7 @@ const DashboardPelamar = () => {
                 className="ml-8 w-11 h-11 rounded-full flex items-center justify-center"
                 style={{ backgroundColor: "#409144" }}
               >
-                <img
-                  src={iconChecklistPelamar}
-                  alt="accepted"
-                  className="w-5 h-5"
-                />
+                <User color="#ffffff" />
               </div>
             </div>
 
@@ -177,9 +172,6 @@ const DashboardPelamar = () => {
               <p className="text-lg font-medium text-gray-700 mt-1">
                 Lolos Seleksi
               </p>
-              <span className="text-xs text-blue-600">
-                +8% from yesterday
-              </span>
             </div>
           </div>
         </div>

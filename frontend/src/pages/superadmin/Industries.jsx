@@ -79,8 +79,7 @@ export default function Industries() {
   };
 
   return (
-    <SuperAdminLayout>
-      <div className="p-6">
+          <div className="p-6">
 
         {/* HEADER */}
         <div className="mb-6">
@@ -226,6 +225,5 @@ export default function Industries() {
         </div>
 
       </div>
-    </SuperAdminLayout>
   );
 }

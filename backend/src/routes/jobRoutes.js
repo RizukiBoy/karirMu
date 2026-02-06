@@ -11,18 +11,21 @@ const {
     saveJob,
     unsaveJob,
     getSavedJobsForUser,
-    checkSavedJob
+    checkSavedJob,
+    updateUserCV
 } = require("../controllers/jobController");
 const companyMiddleware = require("../middleware/companyMiddleware");
 const { getApplicantDetailForCompany, updateApplication, getApplicantsByJob } = require("../controllers/applyJobController");
 const verifyCompanyByDocuments = require("../middleware/verifyCompanyByDocuments");
+const checkDocumentsMiddleware = require("../middleware/checkDocumentsMiddleware");
+const upload = require("../middleware/multer");
 
 // post
 router.post(
-  "/jobs", authMiddleware, companyMiddleware, createJobs);
+  "/jobs", authMiddleware, companyMiddleware, checkDocumentsMiddleware, createJobs);
 
 // get
-router.get("/jobs/",authMiddleware, companyMiddleware, getJobsByCompany);
+router.get("/jobs/",authMiddleware, companyMiddleware, checkDocumentsMiddleware, getJobsByCompany);
 
 router.get("/jobs/:jobId", getJobDetail);
 
@@ -39,6 +42,8 @@ router.post(
   roleMiddleware("pelamar"),
   applyJob
 );
+
+router.put("/update-cv", authMiddleware, roleMiddleware("pelamar"), upload.single("resume_cv"), updateUserCV)
 router.get("/job/:jobId/list-applicants", authMiddleware, roleMiddleware("company_hrd"), getApplicantsByJob)
 router.get("/applications/:applyId", authMiddleware, roleMiddleware("company_hrd"), getApplicantDetailForCompany);
 router.patch("/applications/:applyId", authMiddleware, roleMiddleware("company_hrd"), updateApplication)

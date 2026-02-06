@@ -12,6 +12,8 @@ import {
 
 const HistoryJobs = () => {
   const [dataLamaran, setDataLamaran] = useState([]);
+  const [filterStatus, setFilterStatus] = useState("Semua");
+
   const navigate = useNavigate();
 
   const accessToken = localStorage.getItem("accessToken"); // atau dari context
@@ -75,9 +77,15 @@ const HistoryJobs = () => {
     }
   };
 
+  const filteredLamaran =
+  filterStatus === "Semua"
+    ? dataLamaran
+    : dataLamaran.filter((item) => item.status === filterStatus);
+
+
   return (
     <PelamarLayout>
-      <div className="space-y-6 ">
+      <div className="space-y-6 ml-4">
         {/* FILTER STATUS HEADER */}
         <div
           className="px-4 py-3 rounded-t-2xl font-medium text-white"
@@ -91,16 +99,28 @@ const HistoryJobs = () => {
         {/* FILTER STATUS */}
         <div className="bg-white p-4 rounded-xl shadow">
           <h3 className="font-semibold mb-3">Filter Status</h3>
-          <div className="flex flex-wrap gap-3">
-            {["Semua", "Pending", "Diterima", "Tolak"].map((item, i) => (
-              <button
-                key={i}
-                className="px-4 py-1.5 border border-green-600 text-green-600 rounded-full text-sm hover:bg-green-50"
-              >
-                {item}
-              </button>
-            ))}
-          </div>
+        <div className="flex flex-wrap gap-3">
+          {[
+            { label: "Semua", value: "Semua" },
+            { label: "Pending", value: "Ditinjau" },
+            { label: "Diterima", value: "Lolos" },
+            { label: "Tolak", value: "Ditolak" },
+          ].map((item, i) => (
+            <button
+              key={i}
+              onClick={() => setFilterStatus(item.value)}
+              className={`px-4 py-1.5 border rounded-full text-sm transition
+                ${
+                  filterStatus === item.value
+                    ? "bg-green-600 text-white border-green-600"
+                    : "border-green-600 text-green-600 hover:bg-green-50"
+                }
+              `}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
         </div>
 
         {/* DAFTAR LAMARAN HEADER */}
@@ -115,7 +135,7 @@ const HistoryJobs = () => {
 
         {/* GRID CARD */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-          {dataLamaran.map((item, index) => (
+          {filteredLamaran.map((item, index) => (
             <div
               key={index}
               className="bg-white rounded-xl shadow p-5 w-552px h-472px flex flex-col"

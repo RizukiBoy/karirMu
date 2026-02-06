@@ -5,9 +5,9 @@ import RegisterImage from "../assets/img/auth.png";
 const Register = () => {
   const navigate = useNavigate();
 
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -22,12 +22,11 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-
-  if (!email || !fullName || !password) {
-    setMessage("Semua field wajib diisi");
-    return;
-  }
-
+    // ✅ VALIDASI (LOGIC HALAMAN 2)
+    if (!fullName || !email || !password) {
+      setMessage("Semua field wajib diisi");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -37,8 +36,8 @@ const Register = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email,
           fullName,
+          email,
           password,
           register_as: "pelamar",
         }),
@@ -51,8 +50,11 @@ const Register = () => {
         return;
       }
 
+      // 🚀 REDIRECT (DIPERTAHANKAN)
       navigate("/auth/check-email");
-    } catch {
+
+    } catch (err) {
+      console.error(err);
       setMessage("Terjadi kesalahan server");
     } finally {
       setLoading(false);
@@ -60,11 +62,11 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#C1C7CD] flex items-center justify-center px-6 md:px-16 rounded-lg">
-      <div className="flex flex-col md:flex-row w-full max-w-360 bg-white rounded-lg overflow-hidden shadow-lg">
+    <div className="min-h-screen bg-[#ffffff] flex items-center justify-center relative">
+      <div className="flex flex-col md:flex-row w-full max-w-360 bg-white rounded-[48px] overflow-hidden px-4">
 
         {/* IMAGE */}
-        <div className="hidden md:block bg-[#2e2d2d] w-150 rounded-tr-[70px] rounded-br-[70px] overflow-hidden">
+        <div className="hidden md:block md:w-150 bg-white rounded-tr-[70px] rounded-br-[70px] overflow-hidden">
           <img
             src={RegisterImage}
             alt="Register"
@@ -74,12 +76,13 @@ const Register = () => {
 
         {/* FORM */}
         <div className="w-full md:w-180 p-8 md:p-16 flex flex-col gap-6 justify-center">
+
           <h1 className="text-xl md:text-2xl font-bold text-center md:text-left">
             Daftar Akun
           </h1>
 
           {message && (
-            <div className="text-sm text-center text-red-600 bg-red-50 border border-red-200 rounded-md py-2 px-3 animate-fadeIn">
+            <div className="text-sm text-center text-red-600 bg-red-50 border border-red-200 rounded-md py-2 px-3">
               {message}
             </div>
           )}
@@ -97,7 +100,6 @@ const Register = () => {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 className="px-4 py-3 bg-gray-100 rounded outline-none focus:ring-2 focus:ring-blue-500"
-                required
               />
             </div>
 
@@ -112,7 +114,6 @@ const Register = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="px-4 py-3 bg-gray-100 rounded outline-none focus:ring-2 focus:ring-blue-500"
-                required
               />
             </div>
 
@@ -127,7 +128,6 @@ const Register = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="px-4 py-3 bg-gray-100 rounded outline-none focus:ring-2 focus:ring-blue-500"
-                required
               />
             </div>
 
@@ -135,13 +135,18 @@ const Register = () => {
             <button
               type="submit"
               disabled={loading}
-              className="mt-2 w-full bg-blue-600 text-white py-3 rounded font-semibold hover:bg-blue-700 transition disabled:opacity-60"
+              style={{
+                background: "linear-gradient(90deg, #004F8F 0%, #009B49 100%)",
+              }}
+              className="mt-2 w-full text-white py-3 rounded font-semibold hover:opacity-90 transition disabled:opacity-60"
             >
               {loading ? "Memproses..." : "Daftar"}
             </button>
+
+            <div className="my-4 border-t border-gray-300"></div>
           </form>
 
-
+          {/* LOGIN LINK */}
           <p className="text-sm text-gray-600 text-center">
             Sudah punya akun?{" "}
             <Link
@@ -152,14 +157,15 @@ const Register = () => {
             </Link>
           </p>
 
-            <p className="text-center text-sm text-gray-600 mt-2">
+          {/* ADMIN AUM */}
+          <p className="text-center text-sm text-gray-600 mt-2">
             Admin AUM?{" "}
-            <a
-              href="/auth/register-admin-aum"
+            <Link
+              to="/auth/register-admin-aum"
               className="text-blue-600 font-semibold hover:underline"
             >
               Daftar di sini
-            </a>
+            </Link>
           </p>
 
         </div>

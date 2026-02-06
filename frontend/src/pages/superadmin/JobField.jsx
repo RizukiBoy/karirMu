@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import SuperAdminLayout from "../../components/layout/SuperAdminLayout";
+import Industries from "../superadmin/Industries";
 
 export default function JobFields() {
   const [jobFields, setJobFields] = useState([]);
@@ -223,6 +224,7 @@ export default function JobFields() {
       </div>
     </div>
 
+<Industries />
   </div>
 </SuperAdminLayout>
   );

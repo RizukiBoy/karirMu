@@ -14,6 +14,7 @@ import {
   ArrowLeft,
   Share,
 } from "iconsax-reactjs";
+import ApplyJobModal from "./ApplyJobModal";
 
 const JOB_TYPE_LABEL = {
   full_time: "Penuh Waktu",
@@ -47,6 +48,7 @@ const PublicJobDetail = () => {
 
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [openApply, setOpenApply] = useState(false);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -167,12 +169,18 @@ const PublicJobDetail = () => {
 
           <div className="flex items-center gap-5">
             <Share size="20" className="text-gray-600 cursor-pointer" />
-            <button
-              onClick={() => navigate(`/jobs/${jobId}/apply`)}
-              className="px-6 py-2 bg-green-600 text-white rounded-lg"
-            >
-              Lamar
-            </button>
+      <button
+        onClick={() => setOpenApply(true)}
+        className="px-6 py-2 bg-green-600 text-white rounded-lg"
+      >
+        Lamar
+      </button>
+
+      <ApplyJobModal
+        isOpen={openApply}
+        onClose={() => setOpenApply(false)}
+        jobId={jobId}
+      />
           </div>
         </div>
       </div>

@@ -205,17 +205,6 @@ return (
       </select>
     </div>
 
-    {/* STATUS */}
-    <label className="flex items-center gap-2 text-sm">
-      <input
-        type="checkbox"
-        name="status"
-        checked={form.status}
-        onChange={handleChange}
-      />
-      <span>Aktifkan Lowongan</span>
-    </label>
-
     {/* ACTION */}
     {error && (
       <p className="text-red-500 text-sm">{error}</p>
