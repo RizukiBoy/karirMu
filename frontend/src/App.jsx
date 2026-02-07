@@ -31,7 +31,7 @@ import Profile from "./pages/pelamar/Profile";
 
 import JobFields from "./pages/superadmin/JobField";
 import JobDetailPage from "./components/JobDetailPage";
-import AddProfile from "./components/users/ProfileForm";
+import AddProfile from "./components/users/step1/ProfileForm";
 import ApplicationList from "./pages/adminAum/ApplicationList";
 import ApplicationDetail from "./components/ApplicationDetail";
 import LoginAdmin from "./pages/superadmin/loginAdmin";
@@ -46,8 +46,8 @@ import CariLowongan from "./pages/pelamar/CariLowongan";
 import HistoryJobs from "./pages/pelamar/HistoryJobs";
 import SavedJobs from "./pages/pelamar/SavedJobs";
 import PengajuanAum from "./pages/superadmin/PengajuanAum";
-import Education from "./pages/pelamar/Education";
-import ProfileForm from "./components/users/ProfileForm";
+// import Education from "./pages/pelamar/Education";
+import ProfileForm from "./components/users/step1/ProfileForm";
 import DetailPengajuanAum from "./pages/superadmin/DetailPengajuanAum";
 import Industries from "./pages/superadmin/Industries";
 import ListPelamarByJob from "./components/adminAum/ListPelamarByJob";
@@ -76,8 +76,8 @@ function App() {
         {/* PELAMAR */}
         <Route element={<ProtectedRoute allowedRole={["pelamar"]} />}>
         <Route path="/user/profile" element={<Profile />} />
-        <Route path="/user/education" element={<Education />} />
-        <Route path="/user/add-profile" element={<ProfileForm />} />
+        {/* <Route path="/user/education" element={<Education />} /> */}
+        {/* <Route path="/user/add-profile" element={<ProfileForm />} /> */}
         <Route path="/user/dashboard" element={<DashboardPelamar />} />
         <Route path="/jobs/:jobId/apply" element={<ApplyJobPage />} />
         <Route path="/cari-lowongan" element={<CariLowongan />} />

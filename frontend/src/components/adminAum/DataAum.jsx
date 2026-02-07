@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import userIcon from "../../assets/icons/ProfilAum/user.svg";
+import axios from 'axios';
 
 /* ================= Reusable Components ================= */
 const Input = ({ label, placeholder, value, onChange, type = "text" }) => (
@@ -148,7 +149,7 @@ const DataAum = ({ formData = {}, setFormData, submitHandler, agree, setAgree })
     data.append("company_url", formData.company_url || "");
     data.append("description", formData.description || "");
     data.append("address", formData.address || "");
-    data.append("industry", formData.industry_id || "");
+    data.append("industry_id", formData.industry_id || "");
     data.append("employee_range", formData.employee_range || "");
 
     // Backend Anda minta JSON string

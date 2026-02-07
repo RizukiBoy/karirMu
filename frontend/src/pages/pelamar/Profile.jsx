@@ -1,197 +1,24 @@
-// import { useEffect, useState } from "react";
-// import axios from "axios";
-// import { useNavigate } from "react-router-dom";
-// import UserDocumentSection from "../../components/users/userDocumentSection";
-// import EducationSection from "../../components/users/EducationSection";
-// import UserSkills from "../../components/users/UserSkill";
-// import WorkExperience from "../../components/users/WorkExperience";
-// import ProfileSection from "../../components/users/ProfileSection";
-
-// export default function ProfileDetail() {
-//   const [profile, setProfile] = useState(null);
-//   const [loading, setLoading] = useState(true);
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     const fetchProfile = async () => {
-//       try {
-//         const res = await axios.get("http://localhost:5000/api/user/profile", {
-//           headers: {
-//             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-//           },
-//         });
-
-//         setProfile(res.data);
-//       } catch (error) {
-//         console.error(error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchProfile();
-//   }, []);
-
-//   if (loading) {
-//     return <p className="text-center mt-10">Memuat profil...</p>;
-//   }
-
-//   if (!profile) {
-//     navigate("/user/add-profile");
-//     return null;
-//   }
-
-//   return (
-//     <div className="max-w-5xl mx-auto space-y-8">
-//       {/* GRID 1: Profile + Dokumen */}
-//       <section className="bg-white p-6 rounded-xl shadow">
-//         <ProfileSection profile={profile} />
-
-//         <div className="mt-6">
-//           <UserDocumentSection />
-//         </div>
-
-//         {/* Grid khusus tombol */}
-//         <div className="grid grid-cols-1 mt-6">
-//           <button
-//             onClick={() => navigate("/profile/edit")}
-//             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-//           >
-//             Edit Profil
-//           </button>
-//         </div>
-//       </section>
-
-//       {/* GRID 2: Pendidikan */}
-//       <section className="bg-white p-6 rounded-xl shadow">
-//         <EducationSection />
-//       </section>
-
-//       {/* GRID 3: Pengalaman + Keahlian */}
-//       <section className="bg-white p-6 rounded-xl shadow">
-//         <WorkExperience />
-//         <div className="mt-6">
-//           <UserSkills />
-//         </div>
-//       </section>
-//     </div>
-//   );
-// }
-
-
-// export default function ProfileDetail() {
-//   return (
-//     <div className="max-w-6xl mx-auto space-y-6 pb-24">
-
-//       {/* ===== Stepper ===== */}
-//       <div className="bg-white rounded-xl shadow p-4 flex justify-between items-center text-sm">
-//         <Step label="1. Biodata & Dokumen" active done />
-//         <Step label="2. Pendidikan" />
-//         <Step label="3. Pengalaman & Keahlian" />
-//       </div>
-
-//       {/* ===== BIODATA ===== */}
-//       <section className="bg-white rounded-xl shadow">
-//         <SectionHeader title="Biodata" />
-
-//         <div className="p-6 space-y-6">
-//           {/* Foto */}
-//           <div className="flex items-center gap-6">
-//             <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center">
-//               <span className="text-gray-400">👤</span>
-//             </div>
-
-//             <div>
-//               <button className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg text-sm hover:bg-blue-50">
-//                 Upload Foto
-//               </button>
-//               <button className="ml-3 text-sm text-red-500 hover:underline">
-//                 Hapus
-//               </button>
-//             </div>
-
-//             <div className="text-sm text-gray-500 ml-8">
-//               <p className="font-medium text-gray-700">Profil Pelamar</p>
-//               <ol className="list-decimal ml-4">
-//                 <li>Min. 400 x 400px</li>
-//                 <li>Max. 2MB</li>
-//                 <li>Show Your Face</li>
-//               </ol>
-//             </div>
-//           </div>
-
-//           {/* Form Grid */}
-//           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//             <Input label="Judul Utama" placeholder="Tuliskan judul utama" />
-//             <div className="md:col-span-2">
-//               <Textarea label="Tentang Saya" placeholder="Tuliskan profil singkat Anda" />
-//             </div>
-//             <Input label="Domisili" placeholder="Pilih Kota" />
-//             <Input label="Nomor Telepon (WhatsApp)" placeholder="+62" />
-//             <Select label="Jenis Kelamin" options={["Laki-laki", "Perempuan"]} />
-//             <Input label="Usia" placeholder="Usia / Umur" />
-//             <div className="md:col-span-2">
-//               <Textarea label="Alamat Lengkap" placeholder="Detail jalan, nomor gedung, dan RT/RW" />
-//             </div>
-//           </div>
-//         </div>
-//       </section>
-
-//       {/* ===== CV & PORTOFOLIO ===== */}
-//       <section className="bg-white rounded-xl shadow">
-//         <SectionHeader title="CV & Portofolio" />
-
-//         <div className="p-6 space-y-4">
-//           <div>
-//             <label className="text-sm text-gray-600">
-//               Unggah Dokumen CV/Resume (PDF, Maks 5MB)
-//             </label>
-//             <div className="flex border rounded-lg overflow-hidden mt-2">
-//               <button className="px-4 py-2 bg-gray-200 text-sm">
-//                 Pilih File
-//               </button>
-//               <div className="flex-1 px-4 py-2 text-sm text-gray-400">
-//                 Placeholder
-//               </div>
-//             </div>
-//           </div>
-
-//           <Input label="Link Portofolio" placeholder="Tempel Tautan Disini" />
-//         </div>
-//       </section>
-
-//       {/* ===== Sticky Footer ===== */}
-//       <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow p-4 flex justify-end">
-//         <button className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
-//           Simpan
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }
-
-
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import PelamarLayout from "../../components/layout/PelamarLayout"
+import PelamarLayout from "../../components/layout/PelamarLayout";
 
-import ProfileForm from "../../components/users/ProfileForm";
-import ProfileSection from "../../components/users/ProfileSection";
+import ProfileStepper from "../../components/users/profile/ProfileStepper";
 
-import DocumentForm from "../../components/users/DocumentForm";
-import DocumentSection from "../../components/users/DocumentSection";
+import ProfileForm from "../../components/users/step1/ProfileForm";
+import ProfileSection from "../../components/users/step1/ProfileSection";
+import DocumentForm from "../../components/users/step1/DocumentForm";
+import DocumentSection from "../../components/users/step1/DocumentSection";
 
-import EducationForm from "../../components/users/EducationForm";
-import EducationSection from "../../components/users/EducationSection";
+import EducationForm from "../../components/users/step2/EducationForm";
+import EducationSection from "../../components/users/step2/EducationSection";
 
-import WorkExperienceForm from "../../components/users/WorkExperienceForm";
-import WorkExperience from "../../components/users/WorkExperienceForm";
-import UserSkills from "../../components/users/SkillForm";
+import WorkExperienceForm from "../../components/users/step3/WorkExperienceForm";
+import SkillForm from "../../components/users/step3/SkillForm";
+import Step3Section from "../../components/users/step3/Step3Section";
 
-import ProfileStepper from "../../components/users/ProfileStepper";
-
- // ===== VALIDATION HELPERS =====
+/* ======================
+   VALIDATION HELPERS
+====================== */
 const hasText = (v) => typeof v === "string" && v.trim().length > 0;
 
 const validateStep1 = (p) => {
@@ -203,323 +30,439 @@ const validateStep1 = (p) => {
     hasText(p.location) &&
     hasText(p.whatsapp) &&
     (
-      hasText(p.cv_file) ||
-      hasText(p.portfolio_link)
+      p.photo instanceof File ||
+      p.resume_cv instanceof File ||
+      hasText(p.portofolio_link)
     )
   );
 };
 
-const validateStep2 = (p) => {
-  return Array.isArray(p?.education) && p.education.length > 0;
-};
-
-const validateStep3 = (p) => {
-  return (
-    (Array.isArray(p?.experiences) && p.experiences.length > 0) ||
-    (Array.isArray(p?.skills) && p.skills.length > 0)
-  );
-};
-
-
 export default function Profile() {
-  const [loading, setLoading] = useState(true);
   const [activeStep, setActiveStep] = useState(1);
+
+  // ===== STEP 1 =====
   const [profile, setProfile] = useState(null);
-  const [loadingProfile, setLoadingProfile] = useState(true)
-  const [editing, setEditing] = useState(false);
+  const [document, setDocument] = useState(null);
+
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [step1Submitted, setStep1Submitted] = useState(false);
+const [step2Submitted, setStep2Submitted] = useState(false);
+const [step3Submitted, setStep3Submitted] = useState(false);
 
 
-  const navigate = useNavigate();
 
-// ===== STEP COMPLETE FLAGS =====
-// ===== STEP COMPLETE FLAGS (DERIVED STATE) =====
+  const [step1Data, setStep1Data] = useState({
+  // profile
+  headline: "",
+  about_me: "",
+  address: "",
+  location: "",
+  age: "",
+  gender: "",
+  whatsapp: "",
+  photo: null,
+
+  // document
+  resume_cv: null,
+  portofolio_link: "",
+});
+
+const [loadingStep1, setLoadingStep1] = useState(false);
 
 
+  // ===== STEP 2 =====
+  const [education, setEducation] = useState([]);
 
-const goToStep = (targetStep) => {
-  // selalu boleh ke step 1
-  if (targetStep === 1) {
-    setActiveStep(1);
-    return;
-  }
+  // ===== STEP 3 =====
+  const [workExperience, setWorkExperience] = useState([]);
+  const [skills, setSkills] = useState([]);
 
-  // ke step 2 hanya kalau step 1 sudah valid
-  if (targetStep === 2) {
-    if (!step1Complete) {
-      console.warn("Step 1 belum lengkap");
-      return;
+  /* ======================
+     MERGE STEP 1 DATA
+  ====================== */
+  const updateStep1Data = (partial) => {
+    setStep1Data((prev) => ({ ...prev, ...partial }));
+  };
+
+
+const handleStepChange = (step) => {
+  setActiveStep(step);
+};
+
+  /* ======================
+     API LOADERS
+  ====================== */
+  const authHeader = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    },
+  };
+
+  const loadProfile = async () => {
+    const res = await axios.get("http://localhost:5000/api/user/profile", authHeader);
+    setProfile(res.data);
+  };
+
+  const loadDocument = async () => {
+    const res = await axios.get("http://localhost:5000/api/user/document", authHeader);
+    setDocument(res.data.data);
+  };
+
+  const loadEducation = async () => {
+    const res = await axios.get("http://localhost:5000/api/user/education", authHeader);
+    setEducation(res.data || []);
+  };
+
+  const loadWorkExperience = async () => {
+    const res = await axios.get(
+      "http://localhost:5000/api/user/work-experience",
+      authHeader
+    );
+    setWorkExperience(res.data || []);
+  };
+
+  const loadSkills = async () => {
+    const res = await axios.get("http://localhost:5000/api/user/skill", authHeader);
+    setSkills(res.data || []);
+  };
+
+  useEffect(() => {
+    loadProfile();
+    loadDocument();
+    loadEducation();
+    loadWorkExperience();
+    loadSkills();
+  }, []);
+
+  /* ======================
+     STEP 1 SUBMIT
+  ====================== */
+const submitStep1 = async () => {
+  try {
+    setLoadingStep1(true);
+
+    /* ======================
+       1. SUBMIT PROFILE
+    ====================== */
+    const profileForm = new FormData();
+
+    const profileFields = [
+      "headline",
+      "about_me",
+      "address",
+      "location",
+      "age",
+      "gender",
+      "whatsapp",
+      "photo",
+    ];
+
+    profileFields.forEach((key) => {
+      const value = step1Data[key];
+      if (value !== null && value !== "") {
+        profileForm.append(key, value);
+      }
+    });
+
+    await axios.post(
+      "http://localhost:5000/api/user/profile",
+      profileForm,
+      authHeader
+    );
+
+    /* ======================
+       2. SUBMIT DOCUMENT
+    ====================== */
+    const documentForm = new FormData();
+
+    if (step1Data.resume_cv) {
+      documentForm.append("resume_cv", step1Data.resume_cv);
     }
-    setActiveStep(2);
-    return;
-  }
 
-  // ke step 3 hanya kalau step 2 sudah valid
-  if (targetStep === 3) {
-    if (!step2Complete) {
-      console.warn("Step 2 belum lengkap");
-      return;
-    }
-    setActiveStep(3);
-    return;
+    documentForm.append(
+      "portofolio_link",
+      step1Data.portofolio_link || ""
+    );
+
+    await axios.post(
+      "http://localhost:5000/api/user/document",
+      documentForm,
+      authHeader
+    );
+
+    /* ======================
+       3. REFRESH & MARK DONE
+    ====================== */
+    await loadProfile();
+    await loadDocument();
+
+    setActiveStep(2); 
+    setStep1Submitted(true);
+    return true
+  } catch (error) {
+    return false;
+  } finally {
+    setLoadingStep1(false);
   }
 };
 
-  // ======== PROFILE ========
 
   const refreshProfile = async () => {
-    setLoadingProfile(true)
-    try {
-      const res = await axios.get("http://localhost:5000/api/user/profile", {
+  setLoadingProfile(true);
+
+  try {
+    const res = await axios.get(
+      "http://localhost:5000/api/user/profile",
+      {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
-      });
-      setProfile(res.data);
-      console.log(res.data)
-    } catch (err) {
-      console.error(err);
-      setLoadingProfile(false)
+      }
+    );
+
+    setProfile(res.data);
+  } catch (err) {
+    if (err.response?.status === 404) {
+      // ⬅️ TAMBAHKAN INI
+      setProfile(null); // profile belum ada → tampilkan form
+    } else {
+      console.error("Gagal load profile:", err);
     }
-  };
+  } finally {
+    setLoadingProfile(false);
+  }
+};
 
-  useEffect(() => {
-    refreshProfile();
-  }, []);
-
-   const [document, setDocument] = useState(null);
-
-  const refreshDocument = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/user/document", {
+const refreshDocument = async () => {
+  try {
+    const res = await axios.get(
+      "http://localhost:5000/api/user/document",
+      {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
-      });
-      setDocument(res.data.data);
-      console.log(res.data)
+      }
+    );
 
-    } catch (err) {
+    setDocument(res.data.data);
+  } catch (err) {
+    if (err.response?.status === 404) {
+      setDocument(null); // belum upload dokumen
+    } else {
       console.error(err);
     }
-  };
-
-  useEffect(() => {
-    refreshDocument();
-  }, []);
-
-  const [education, setEducation] = useState(null);
-
-  const refreshEducation = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/user/education", {
+  }
+};
+const refreshEducation = async () => {
+  try {
+    const res = await axios.get(
+      "http://localhost:5000/api/user/education",
+      {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
-      });
-      setEducation(res.data);
-      console.log(res.data)
+      }
+    );
 
-    } catch (err) {
-      console.error(err);
+    // WAJIB array
+    setEducation(Array.isArray(res.data.data) ? res.data.data : []);
+  } catch (err) {
+    if (err.response?.status === 404) {
+      // belum ada data pendidikan
+      setEducation([]);
+    } else {
+      console.error("Gagal refresh education:", err);
     }
-  };
+  }
+};
 
-  useEffect(() => {
-    refreshEducation();
-  }, []);
+useEffect(() => {
+  refreshProfile();
+  refreshDocument();
+  refreshEducation();
+}, []);
 
-  // // ======== SKILLS ========
-  const [skills, setSkills] = useState(null);
+const step1Complete = validateStep1(step1Data);
+  const step2Complete = education.length > 0;
+  const step3Complete = workExperience.length > 0 || skills.length > 0;
 
-  const refreshSkills = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/user/skill", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
-      setSkills(res.data);
-      console.log(res.data)
-
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    refreshSkills();
-  }, []);
-
-  // // ======== WORK EXPERIENCE ========
-  const [workExperience, setWorkExperience] = useState(null);
-
-  const refreshWorkExperience = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/user/work-experience", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
-      setWorkExperience(res.data);
-      console.log(res.data)
-
-    } catch (err) {
-      console.error(err);
-      
-    }
-  };
-
-  useEffect(() => {
-    refreshWorkExperience();
-  }, []);
-
-
-const step1Complete = Boolean(profile && document);
-const step2Complete = Boolean(education);
-const step3Complete = Boolean(
-  workExperience?.length > 0
-);
 
   return (
     <PelamarLayout>
-    <div className="max-w-6xl mx-auto space-y-6 pb-24 ml-4">
+      <div className="max-w-6xl mx-auto space-y-6 pb-24">
 
-      {/* ===== Stepper ===== */}
-    <ProfileStepper
-      activeStep={activeStep}
-      onStepChange={goToStep}
-      step1Complete={step1Complete}
-      step2Complete={step2Complete}
-      step3Complete={step3Complete}
-    />
+        {/* ===== STEPPER ===== */}
+        <ProfileStepper
+          activeStep={activeStep}
+          onStepChange={handleStepChange}
+          step1Complete={step1Complete}
+          step2Complete={step2Complete}
+          step3Complete={step3Complete}
+        />
 
-      {/* ===== TAB 1: BIODATA + DOKUMEN ===== */}
-      {activeStep === 1 && (
-        <section className="bg-white rounded-xl shadow">
-          <SectionHeader title="Biodata & Dokumen" />
-          <div className="p-6 space-y-6">
+        {/* ==================================================
+            STEP 1 — PROFILE & DOCUMENT
+        ================================================== */}
+        {activeStep === 1 && (
+          <section className="bg-white rounded-xl shadow">
+            <SectionHeader title="Profil & Dokumen" />
 
-    {!profile || editing ? (
-      <ProfileForm
-        mode={profile ? "edit" : "create"}
-        initialData={profile}
-        onSaved={(data) => {
-          setProfile(data);
-          setEditing(false);   // 🔥 balik ke section
-        }}
-        onCancel={() => setEditing(false)}
-      />
-    ) : (
-      <ProfileSection
-        profile={profile}
-        onEdit={() => setEditing(true)}   // 🔥 buka form edit
-      />
-    )}
+            <div className="p-6 space-y-6">
+              {/* PROFILE */}
+              {!profile || editingProfile ? (
+                <ProfileForm
+                  initialData={profile}
+                  value={step1Data}
+                  mode={profile ? "edit" : "create"}
+                  onChange={updateStep1Data}
+                  onCancel={() => setEditingProfile(false)}
+                />
+              ) : (
+                <ProfileSection
+                  profile={profile}
+                  onEdit={() => setEditingProfile(true)}
+                />
+              )}
 
+              {/* DOCUMENT */}
+              {document ? (
+                <DocumentSection document={document} />
+              ) : (
+                <DocumentForm
+                  initialData={document}
+                  onChange={updateStep1Data}
+                />
+              )}
 
-
-            {document ? (
-              <DocumentSection document={document} onSaved={refreshDocument} />
-            ) : (
-              <DocumentForm onEdit={() => setDocument(null)} />
-            )}
-
-
-            {/* ACTION BAR */}
-            <div className="flex justify-end pt-4">
-              <button
-                disabled={!step1Complete}
-                onClick={() => goToStep(2)}
-                className={`px-6 py-2 rounded-lg ${
-                  step1Complete
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                Lanjut
-              </button>
+              {/* ACTION */}
+              <div className="flex justify-end pt-4">
+                {!step1Submitted && (
+                  <div className="flex justify-end pt-4">
+                    <button
+                      disabled={!step1Complete || loadingStep1}
+                      onClick={async () => {
+                        const success = await submitStep1();
+                        if (success) setActiveStep(2);
+                      }}
+                      className={`px-6 py-2 rounded-lg ${
+                        step1Complete
+                          ? "bg-blue-600 text-white hover:bg-blue-700"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      }`}
+                    >
+                      {loadingStep1 ? "Menyimpan..." : "Lanjut"}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )}
 
+        {/* ==================================================
+            STEP 2 — EDUCATION
+        ================================================== */}
+        {activeStep === 2 && (
+          <section className="bg-white rounded-xl shadow">
+            <SectionHeader title="Pendidikan" />
 
-      {/* ===== TAB 2: PENDIDIKAN ===== */}
-      {activeStep === 2 && (
-        <section className="bg-white rounded-xl shadow">
-          <SectionHeader title="Pendidikan" />
+            <div className="p-6 space-y-6">
+              {/* LIST */}
+              <EducationSection education={education} />
 
-          <div className="p-6 space-y-6">
-          {!education ? (
-            <EducationForm onSaved={refreshEducation} />
-          ) : (
-            <EducationSection education={education} onEdit={() => setEducation(null)} />
-          )}
+              {/* FORM */}
+              <EducationForm onSuccess={loadEducation} />
 
-            {/* ACTION BAR */}
-            <div className="flex justify-between pt-4">
-              <button
-                onClick={() => goToStep(1)}
-                className="px-6 py-2 border rounded-lg hover:bg-gray-50"
-              >
-                Kembali
-              </button>
+              {/* ACTION */}
+              {!step2Submitted && (
+                <div className="flex justify-between pt-4">
+                  <button
+                    onClick={() => setActiveStep(1)}
+                    className="px-6 py-2 border rounded-lg"
+                  >
+                    Kembali
+                  </button>
 
-              <button
-                disabled={!step2Complete}
-                onClick={() => goToStep(3)}
-                className={`px-6 py-2 rounded-lg ${
-                  step2Complete
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                Lanjut
-              </button>
+                  <button
+                    disabled={!step2Complete}
+                    onClick={() => {
+                      setStep2Submitted(true);
+                      setActiveStep(3);
+                    }}
+                    className={`px-6 py-2 rounded-lg ${
+                      step2Complete
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                  >
+                    Lanjut
+                  </button>
+                </div>
+              )}
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )}
 
+        {/* ==================================================
+            STEP 3 — EXPERIENCE & SKILLS
+        ================================================== */}
+        {activeStep === 3 && (
+          <section className="bg-white rounded-xl shadow">
+            <SectionHeader title="Pengalaman & Keahlian" />
 
-      {/* ===== TAB 3: PENGALAMAN + KEAHLIAN ===== */}
-      {activeStep === 3 && (
-        <section className="bg-white rounded-xl shadow">
-          <SectionHeader title="Pengalaman & Keahlian" />
+            {/* <div className="p-6 space-y-6">
+              <WorkExperienceForm onSaved={loadWorkExperience} />
+              <SkillForm onSaved={loadSkills} />
 
-          <div className="p-6 space-y-6">
-          {!workExperience ? (
-            <WorkExperienceForm onSaved={refreshWorkExperience} />
-          ) : (
-            <WorkExperienceForm onEdit={() => setWorkExperience(null)} />
-          )}
+              <div className="flex justify-between pt-4">
+                <button
+                  onClick={() => goToStep(2)}
+                  className="px-6 py-2 border rounded-lg"
+                >
+                  Kembali
+                </button>
 
+                <button
+                  disabled={!step3Complete}
+                  onClick={() => alert("Profil lengkap 🎉")}
+                  className={`px-6 py-2 rounded-lg ${
+                    step3Complete
+                      ? "bg-green-600 text-white hover:bg-green-700"
+                      : "bg-gray-300 text-gray-500"
+                  }`}
+                >
+                  Selesai
+                </button>
+              </div>
+            </div> */}
 
-            {/* ACTION BAR */}
-            <div className="flex justify-between pt-4">
-              <button
-                onClick={() => goToStep(2)}
-                className="px-6 py-2 border rounded-lg hover:bg-gray-50"
-              >
-                Kembali
-              </button>
+            {/* <WorkExperienceForm onSaved={(we) => setWorkExperience(prev => [...prev, we])} />
+<SkillForm onSaved={(sk) => setSkills(prev => [...prev, sk])} /> */}
+  <Step3Section />
 
-              <button
-                disabled={!step3Complete}
-                onClick={() => alert("Profil lengkap 🎉")}
-                className={`px-6 py-2 rounded-lg ${
-                  step3Complete
-                    ? "bg-green-600 text-white hover:bg-green-700"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                Selesai
-              </button>
-            </div>
-          </div>
-        </section>
-      )}
-    </div>
+<button
+  disabled={workExperience.length === 0 && skills.length === 0}
+  onClick={async () => {
+    try {
+      for (const we of workExperience) {
+        await axios.post("/api/user/work-experience", we, { headers: authHeader });
+      }
+      for (const sk of skills) {
+        await axios.post("/api/user/skill", { name_skill: sk.name_skill }, { headers: authHeader });
+      }
+      alert("Profil lengkap 🎉");
+    } catch (err) {
+      alert("Gagal menyimpan data step 3");
+    }
+  }}
+>
+  Selesai
+</button>
+
+          </section>
+        )}
+      </div>
     </PelamarLayout>
   );
 }

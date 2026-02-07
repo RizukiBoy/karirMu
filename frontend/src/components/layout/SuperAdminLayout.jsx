@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import logo from "../../assets/img/logoz2.svg"
 // ICONSAX
 import { Notification, Logout, ProfileCircle } from "iconsax-reactjs";
 
@@ -34,12 +34,12 @@ export default function SuperAdminLayout({ children }) {
         <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200">
           {/* LEFT */}
           <div className="flex items-center gap-3">
-            <h1
-              className="font-bold text-lg cursor-pointer"
-              onClick={() => navigate("/super-admin/dashboard")}
-            >
-              KarirMU
-            </h1>
+          <img
+            src={logo}
+            alt="KarirMU Logo"
+            className="h-10 max-w-180px object-contain cursor-pointer"
+            onClick={() => navigate("/super-admin/dashboard")}
+          />
           </div>
 
           {/* RIGHT */}
