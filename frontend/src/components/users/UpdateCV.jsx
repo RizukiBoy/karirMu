@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { useRef } from "react";
 import { DocumentUpload } from "iconsax-reactjs";
 
 const UpdateCV = ({ isOpen, onClose, onSuccess }) => {
@@ -9,46 +10,52 @@ const UpdateCV = ({ isOpen, onClose, onSuccess }) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const [error, setError] = useState("");
+  const isSubmittingRef = useRef(false);
+
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!file) {
-      setError("Silakan pilih file CV terlebih dahulu");
-      return;
-    }
+  // 🔒 CEGAH SUBMIT BERKALI-KALI
+  if (isSubmittingRef.current || loading) return;
 
-    try {
-      setLoading(true);
-      setError("");
+  if (!file) {
+    setError("Silakan pilih file CV terlebih dahulu");
+    return;
+  }
 
-      const formData = new FormData();
-      formData.append("resume_cv", file);
+  try {
+    isSubmittingRef.current = true;
+    setLoading(true);
+    setError("");
 
-      await axios.post(
-        "http://localhost:5000/api/user/document",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+    const formData = new FormData();
+    formData.append("resume_cv", file);
 
-      onSuccess?.(res.data);
-      onClose();
-    } catch (err) {
-      setError(
-        err.response?.data?.message
-      );
-      setLoading(false);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const res = await axios.post(
+      "http://localhost:5000/api/user/document",
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      }
+    );
+
+    // ✅ KIRIM URL CV KE PARENT
+    onSuccess?.(res.data.data?.resume_cv || res.data.resume_cv);
+
+    onClose();
+  } catch (err) {
+    setError(err.response?.data?.message || "Gagal upload CV");
+  } finally {
+    setLoading(false);
+    isSubmittingRef.current = false;
+  }
+};
+
 
   return (
     <>
@@ -97,13 +104,14 @@ const UpdateCV = ({ isOpen, onClose, onSuccess }) => {
             Batal
           </button>
 
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="flex-1 py-3 bg-[#43934B] text-white font-bold rounded-xl shadow-lg disabled:opacity-60"
-          >
-            {loading ? "Mengunggah..." : "Kirim"}
-          </button>
+        <button
+          onClick={handleSubmit}
+          disabled={loading || !file}
+          className="flex-1 py-3 bg-[#43934B] text-white font-bold rounded-xl shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {loading ? "Mengunggah..." : "Kirim"}
+        </button>
+
         </div>
       </div>
     </div>

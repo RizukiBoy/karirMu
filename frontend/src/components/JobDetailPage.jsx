@@ -257,6 +257,9 @@ const handleSave = async () => {
   }
 
   const handleToggleStatus = async () => {
+      if (job.locked) return; // ❌ Cegah toggle jika sudah dikunci
+
+
   try {
     setLoading(true);
 
@@ -268,13 +271,15 @@ const handleSave = async () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        status: newStatus,
+        status: false,
+        locked: true,
       }),
     });
 
     setJob((prev) => ({
       ...prev,
-      status: newStatus,
+      status: false,
+      locked: true,
     }));
     setShowConfirm(false);
   } catch (error) {
@@ -401,21 +406,14 @@ const handleSave = async () => {
                 Edit Lowongan
               </button>
 
-            {job?.status ? (
+        
               <button
-                onClick={handleToggleStatus}
+                onClick={() => setShowConfirm(true)}
                 className="flex-1 p-3 rounded-lg font-semibold text-white transition bg-red-600 hover:bg-red-700"
               >
                 Nonaktifkan
               </button>
-            ) : (
-              <button
-                onClick={handleToggleStatus}
-                className="flex-1 p-3 rounded-lg font-semibold text-white transition bg-emerald-600 hover:bg-emerald-700"
-              >
-                Aktifkan
-              </button>
-            )}
+
 
 
             </div>
@@ -591,7 +589,7 @@ const handleSave = async () => {
         >
           Batal
         </button>
-
+{/* 
         <button
           onClick={handleToggleStatus} 
           className={`flex-1 py-2.5 rounded-lg font-semibold text-white transition
@@ -603,7 +601,19 @@ const handleSave = async () => {
           `}
         >
           {job?.status ? "Nonaktifkan" : "Aktifkan"}
-        </button>
+        </button> */}
+
+<button
+  onClick={handleToggleStatus}
+  disabled={job?.locked} // tombol tidak bisa diklik jika sudah dikunci
+  className={`flex-1 py-2.5 rounded-lg font-semibold text-white transition
+    bg-red-600 hover:bg-red-700
+    ${job?.locked ? "opacity-50 cursor-not-allowed" : ""}`}
+>
+  Nonaktifkan
+</button>
+
+
       </div>
     </div>
   </div>

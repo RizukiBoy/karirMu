@@ -157,6 +157,8 @@ exports.createCompanyProfileWithDocuments = async (req, res) => {
           company_phone,
           company_url,
           logo_url: logoUrl,
+          status: false,
+          notes: "",
           updated_at: new Date(),
         },
         $setOnInsert: { created_at: new Date() },

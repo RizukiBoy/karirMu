@@ -899,7 +899,8 @@ exports.updateJobStatus = async (req, res) => {
       { _id: jobObjectId },
       {
         $set: {
-          status,
+          status :false,
+          locked: true,
           updated_at: new Date(),
         },
       }

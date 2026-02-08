@@ -76,32 +76,37 @@ const DetailPengajuanAum = () => {
 const hasRejectedDoc = documents.some((d) => d.status === "rejected");
 
 const handleFinalDecision = async (finalStatus) => {
-  if (finalStatus === "approved" && hasPendingDoc) {
+  // finalStatus: "approved" atau "rejected"
+  const statusBoolean = finalStatus === "approved"; // true = approved, false = rejected
+
+  // Validasi dokumen pending
+  if (statusBoolean && documents.some((d) => d.status === "pending")) {
     return alert("Masih ada dokumen yang belum diverifikasi");
   }
 
-  if (finalStatus === "approved" && hasRejectedDoc && !notes.trim()) {
+  // Validasi jika ada dokumen ditolak tapi catatan kosong
+  if (statusBoolean && documents.some((d) => d.status === "rejected") && !notes.trim()) {
     return alert("Wajib isi catatan jika ada dokumen ditolak");
   }
 
   if (
     !window.confirm(
       `Yakin ingin ${
-        finalStatus === "approved" ? "MENYETUJUI" : "MENOLAK"
+        statusBoolean ? "MENYETUJUI" : "MENOLAK"
       } pengajuan AUM ini?`
     )
-  ) {
+  )
     return;
-  }
 
   try {
     setSubmitting(true);
 
+    // PATCH ke endpoint verifyCompanyAccount
     await axios.patch(
-      `http://localhost:5000/api/admin/admin-aum/document/${documentId}`,
+      `http://localhost:5000/api/admin/${companyId}/verify-account`,
       {
-        status: finalStatus,
-        admin_note: notes, // ✅ konsisten
+        status: statusBoolean,
+        notes: notes,
       },
       {
         headers: {
@@ -111,13 +116,14 @@ const handleFinalDecision = async (finalStatus) => {
     );
 
     alert("Pengajuan berhasil diproses");
-    navigate("/admin/pengajuan-aum");
+    navigate("/super-admin/pengajuan-aum");
   } catch (err) {
     alert(err.response?.data?.message || "Gagal memproses pengajuan");
   } finally {
     setSubmitting(false);
   }
 };
+
 
 
   return (
@@ -349,7 +355,7 @@ const handleFinalDecision = async (finalStatus) => {
     );
 
     alert("Pengajuan berhasil diproses");
-    navigate("/admin/pengajuan-aum");
+    navigate("/super-admin/pengajuan-aum");
   } catch (err) {
     alert(err.response?.data?.message || "Gagal memproses pengajuan");
   } finally {

@@ -191,6 +191,8 @@ exports.getAdminAumList = async (req, res) => {
           industry: 1,
           company_id: "$hrd.company_id",
           company_name: "$company.company_name",
+          status_account: "$company.status",
+          notes: "$company.notes",
 
           verification: {
             total_documents: "$total_documents",
@@ -259,6 +261,52 @@ exports.verifyCompanyDocument = async (req, res) => {
     });
   }
 };
+
+// PATCH /admin/admin-aum/:companyId/verify-account
+exports.verifyCompanyAccount = async (req, res) => {
+  try {
+    const { companyId } = req.params;
+    const { status, notes } = req.body;
+
+    // ✅ Validasi companyId
+    if (!ObjectId.isValid(companyId)) {
+      return res.status(400).json({ message: "Company ID tidak valid" });
+    }
+
+    // ✅ Validasi status harus boolean
+    if (typeof status !== "boolean") {
+      return res.status(400).json({ message: "Status harus boolean" });
+    }
+
+    // ✅ Update company
+    const result = await companies.updateOne(
+      { _id: new ObjectId(companyId) },
+      {
+        $set: {
+          status,       // true = approved, false = rejected
+          notes: notes || "",
+          updated_at: new Date(),
+        },
+      }
+    );
+
+    if (!result.matchedCount) {
+      return res.status(404).json({ message: "Company tidak ditemukan" });
+    }
+
+    return res.status(200).json({
+      message: `Company berhasil ${status ? "disetujui" : "ditolak"}`,
+      company: { status, notes }
+    });
+  } catch (error) {
+    console.error("ERROR verifyCompanyAccount:", error);
+    return res.status(500).json({
+      message: "Gagal memproses verifikasi company",
+      error: error.message
+    });
+  }
+};
+
 
 exports.getAdminAumDetail = async (req, res) => {
   try {

@@ -168,6 +168,24 @@ const filters = [
                 {/* TITLE */}
                 <h3 className="font-semibold text-gray-800">
                   {item.company_name || item.name || "-"}
+
+                  {item.status_account && (
+                      <span
+                        className={`px-2 py-0.5 text-xs rounded-full ${
+                          item.status_account === true
+                            ? "bg-green-100 text-green-700"
+                            : item.status_account === false
+                            ? "bg-red-100 text-red-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {item.status_account === true
+                          ? "Diterima"
+                          : item.status_account === false
+                          ? "Ditolak"
+                          : "Menunggu"}
+                      </span>
+                    )}
                 </h3>
 
                 {/* INFO */}
@@ -202,7 +220,7 @@ const filters = [
                   </p>
 
                   <div className="bg-gray-100 p-3 rounded-md text-sm text-gray-700 h-24">
-                    {item.verification?.message || "-"}
+                    {item.notes || "-"}
                   </div>
                 </div>
 

@@ -265,7 +265,7 @@ function FilterSelect({ label, value, options = [], onChange }) {
             >
               <div>Pekerjaan</div>
               <div>Tipe pekerjaan</div>
-              <div>Tanggal Dibuat</div>
+              <div>Aktif Sampai</div>
               <div>Status</div>
               <div>Aksi</div>
             </div>

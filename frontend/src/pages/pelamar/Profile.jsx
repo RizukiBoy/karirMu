@@ -283,7 +283,19 @@ useEffect(() => {
   refreshEducation();
 }, []);
 
-const step1Complete = validateStep1(step1Data);
+const step1Complete = Boolean(
+  profile &&
+  profile.headline &&
+  profile.about_me &&
+  profile.location &&
+  profile.whatsapp &&
+  (
+    profile.photo ||
+    document?.resume_cv ||
+    document?.portofolio_link
+  )
+);
+
   const step2Complete = education.length > 0;
   const step3Complete = workExperience.length > 0 || skills.length > 0;
 
@@ -411,35 +423,7 @@ const step1Complete = validateStep1(step1Data);
           <section className="bg-white rounded-xl shadow">
             <SectionHeader title="Pengalaman & Keahlian" />
 
-            {/* <div className="p-6 space-y-6">
-              <WorkExperienceForm onSaved={loadWorkExperience} />
-              <SkillForm onSaved={loadSkills} />
-
-              <div className="flex justify-between pt-4">
-                <button
-                  onClick={() => goToStep(2)}
-                  className="px-6 py-2 border rounded-lg"
-                >
-                  Kembali
-                </button>
-
-                <button
-                  disabled={!step3Complete}
-                  onClick={() => alert("Profil lengkap 🎉")}
-                  className={`px-6 py-2 rounded-lg ${
-                    step3Complete
-                      ? "bg-green-600 text-white hover:bg-green-700"
-                      : "bg-gray-300 text-gray-500"
-                  }`}
-                >
-                  Selesai
-                </button>
-              </div>
-            </div> */}
-
-            {/* <WorkExperienceForm onSaved={(we) => setWorkExperience(prev => [...prev, we])} />
-<SkillForm onSaved={(sk) => setSkills(prev => [...prev, sk])} /> */}
-  <Step3Section />
+            <Step3Section />
 
 <button
   disabled={workExperience.length === 0 && skills.length === 0}

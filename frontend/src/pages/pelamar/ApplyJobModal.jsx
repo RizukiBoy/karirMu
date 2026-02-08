@@ -53,6 +53,12 @@ const ApplyJobModal = ({ isOpen, onClose, jobId }) => {
   }
 }, [isOpen]);
 
+const handleViewCV = () => {
+  if (!cvUrl) return;
+  window.open(cvUrl, "_blank", "noopener,noreferrer");
+};
+
+
 
     const handleApply = async () => {
       if (!cvUrl || isSubmittingRef.current) return;
@@ -115,25 +121,36 @@ const ApplyJobModal = ({ isOpen, onClose, jobId }) => {
             </div>
 
             {/* CV INFO */}
-            <div className="border rounded-lg p-4 bg-gray-50 mb-6">
-              {cvUrl ? (
-                <div className="flex justify-between items-center">
-                  <span className="text-green-700 font-medium text-sm">
-                    CV sudah terunggah
-                  </span>
+          <div className="border rounded-lg p-4 bg-gray-50 mb-6">
+            {cvUrl ? (
+              <div className="flex justify-between items-center">
+                <span className="text-green-700 font-medium text-sm">
+                  CV sudah terunggah
+                </span>
+
+                <div className="flex gap-4">
+                  <button
+                    onClick={handleViewCV}
+                    className="text-gray-700 text-sm font-bold hover:underline"
+                  >
+                    Lihat CV
+                  </button>
+
                   <button
                     onClick={() => setOpenCVModal(true)}
-                    className="text-blue-600 text-sm font-bold"
+                    className="text-blue-600 text-sm font-bold hover:underline"
                   >
                     Ganti CV
                   </button>
                 </div>
-              ) : (
-                <p className="text-red-600 text-sm">
-                  Anda belum mengunggah CV
-                </p>
-              )}
-            </div>
+              </div>
+            ) : (
+              <p className="text-red-600 text-sm">
+                Anda belum mengunggah CV
+              </p>
+            )}
+          </div>
+
 
             {/* ACTION */}
             <div className="flex gap-4">
