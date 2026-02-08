@@ -389,7 +389,7 @@ const handleSearch = () => {
                   <div className="bg-white rounded-lg shadow-sm px-6 py-4 flex justify-between items-center text-sm text-gray-600 mt-6">
                     {/* INFO */}
                     <span>
-                      Menampilkan <b>1–5</b> dari <b>12</b> Lowongan
+                      Menampilkan <b>1–10</b> dari <b>12</b> Lowongan
                     </span>
 
                     {/* PAGE CONTROL */}

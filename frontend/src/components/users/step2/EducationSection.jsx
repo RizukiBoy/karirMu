@@ -11,7 +11,7 @@ export default function EducationSection({ education }) {
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">Pendidikan</h2>
 
-      {education.map((edu, index) => (
+      {education?.map((edu, index) => (
         <div
           key={index}
           className="border rounded-lg p-4 text-sm"

@@ -49,7 +49,7 @@ export default function Profile() {
   const [step1Submitted, setStep1Submitted] = useState(false);
 const [step2Submitted, setStep2Submitted] = useState(false);
 const [step3Submitted, setStep3Submitted] = useState(false);
-
+const isEditMode = Boolean(profile) && editingProfile;
 
 
   const [step1Data, setStep1Data] = useState({
@@ -128,6 +128,24 @@ const handleStepChange = (step) => {
   };
 
   useEffect(() => {
+  if (profile && editingProfile) {
+    setStep1Data({
+      headline: profile.headline || "",
+      about_me: profile.about_me || "",
+      address: profile.address || "",
+      location: profile.location || "",
+      age: profile.age || "",
+      gender: profile.gender || "",
+      whatsapp: profile.whatsapp || "",
+      photo: null, // upload ulang opsional
+      resume_cv: null,
+      portofolio_link: document?.portofolio_link || "",
+    });
+  }
+}, [profile, document, editingProfile]);
+
+
+  useEffect(() => {
     loadProfile();
     loadDocument();
     loadEducation();
@@ -191,11 +209,6 @@ const submitStep1 = async () => {
       authHeader
     );
 
-    /* ======================
-       3. REFRESH & MARK DONE
-    ====================== */
-    await loadProfile();
-    await loadDocument();
 
     setActiveStep(2); 
     setStep1Submitted(true);
@@ -281,23 +294,34 @@ useEffect(() => {
   refreshProfile();
   refreshDocument();
   refreshEducation();
+  loadWorkExperience();
+  loadSkills();
 }, []);
 
-const step1Complete = Boolean(
-  profile &&
-  profile.headline &&
-  profile.about_me &&
-  profile.location &&
-  profile.whatsapp &&
-  (
-    profile.photo ||
-    document?.resume_cv ||
-    document?.portofolio_link
-  )
-);
+const validateStep1FromApi = (profile, document) => {
+  if (!profile) return false;
+
+  return (
+    hasText(profile.headline) &&
+    hasText(profile.about_me) &&
+    hasText(profile.location) &&
+    hasText(profile.whatsapp) &&
+    (
+      hasText(profile.photo) ||
+      hasText(document?.resume_cv) ||
+      hasText(document?.portofolio_link)
+    )
+  );
+};
+
+const step1Complete = profile
+  ? validateStep1FromApi(profile, document)
+  : validateStep1(step1Data);
+
 
   const step2Complete = education.length > 0;
   const step3Complete = workExperience.length > 0 || skills.length > 0;
+const isStep1AlreadyComplete = Boolean(profile) && step1Complete;
 
 
   return (
@@ -352,19 +376,36 @@ const step1Complete = Boolean(
                 {!step1Submitted && (
                   <div className="flex justify-end pt-4">
                     <button
-                      disabled={!step1Complete || loadingStep1}
+                      disabled={loadingStep1 || (!step1Complete && !isEditMode)}
                       onClick={async () => {
+                        // 🔹 CASE 1: Step 1 sudah lengkap & tidak edit → langsung lanjut
+                        if (isStep1AlreadyComplete && !editingProfile) {
+                          setActiveStep(2);
+                          return;
+                        }
+
+                        // 🔹 CASE 2: Create / Edit → submit dulu
                         const success = await submitStep1();
-                        if (success) setActiveStep(2);
+                        if (success) {
+                          await refreshProfile();
+                          await refreshDocument();
+                          setEditingProfile(false);
+                          setActiveStep(2);
+                        }
                       }}
                       className={`px-6 py-2 rounded-lg ${
-                        step1Complete
+                        step1Complete || isEditMode
                           ? "bg-blue-600 text-white hover:bg-blue-700"
                           : "bg-gray-300 text-gray-500 cursor-not-allowed"
                       }`}
                     >
-                      {loadingStep1 ? "Menyimpan..." : "Lanjut"}
+                      {loadingStep1
+                        ? "Menyimpan..."
+                        : isStep1AlreadyComplete && !editingProfile
+                        ? "Lanjut"
+                        : "Simpan & Lanjut"}
                     </button>
+
                   </div>
                 )}
               </div>

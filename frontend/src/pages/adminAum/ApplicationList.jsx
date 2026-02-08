@@ -21,7 +21,7 @@ const ApplicationList = () => {
     accepted: 0,
   })
   
-  const limit = 5;
+  const limit = 10;
   const totalPage = Math.ceil(total / limit)
 
 
