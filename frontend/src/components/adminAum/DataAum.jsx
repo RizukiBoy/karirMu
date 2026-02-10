@@ -3,54 +3,6 @@ import { useNavigate } from "react-router-dom";
 import userIcon from "../../assets/icons/ProfilAum/user.svg";
 import axios from 'axios';
 
-/* ================= Reusable Components ================= */
-const Input = ({ label, placeholder, value, onChange, type = "text" }) => (
-  <div className="w-full">
-    <label className="text-[13px] font-medium text-gray-700">{label}</label>
-    <div className="flex items-center h-10.5 bg-[#F2F4F8] rounded-sm px-4 mt-1">
-      <input
-        type={type}
-        placeholder={placeholder}
-        value={value || ""}
-        onChange={onChange}
-        className="w-full bg-transparent text-sm outline-none"
-      />
-    </div>
-  </div>
-);
-
-const Select = ({ label, placeholder, options = [], value, onChange, disabled }) => (
-  <div className="w-full">
-    <label className="text-[13px] font-medium text-gray-700">{label}</label>
-    <div className="flex items-center h-10.5 bg-[#F2F4F8] rounded-sm px-4 mt-1">
-      <select
-        value={value || ""}
-        onChange={onChange}
-        disabled={disabled}
-        className="w-full bg-transparent text-sm outline-none"
-      >
-        <option value="" disabled>{placeholder}</option>
-        {options.map((opt, i) => (
-          <option key={i} value={opt.value}>{opt.label}</option>
-        ))}
-      </select>
-    </div>
-  </div>
-);
-
-const Textarea = ({ label, placeholder, value, onChange }) => (
-  <div className="w-full">
-    <label className="text-[13px] font-medium text-gray-700">{label}</label>
-    <textarea
-      rows={4}
-      placeholder={placeholder}
-      value={value || ""}
-      onChange={onChange}
-      className="mt-1 w-full bg-[#F2F4F8] px-4 py-3 rounded-sm text-sm resize-none outline-none"
-    />
-  </div>
-);
-
 /* ================= Main Component ================= */
 const DataAum = ({ formData = {}, setFormData, submitHandler, agree, setAgree }) => {
   const navigate = useNavigate();
@@ -63,6 +15,8 @@ const DataAum = ({ formData = {}, setFormData, submitHandler, agree, setAgree })
   const [loadingCity, setLoadingCity] = useState(false);
   const [industries, setIndustries] = useState([]);
   const [loadingIndustry, setLoadingIndustry] = useState(true);
+  const [emailError, setEmailError] = useState("");
+
 
   useEffect(() => {
     const fetchIndustries = async () => {
@@ -137,6 +91,51 @@ const DataAum = ({ formData = {}, setFormData, submitHandler, agree, setAgree })
     if (file) setFormData((prev) => ({ ...prev, logo: file }));
   };
 
+const handlePhoneChange = (value) => {
+  // Pastikan selalu diawali +62
+  if (!value.startsWith("+62")) {
+    value = "+62";
+  }
+
+  // Ambil hanya angka SETELAH +62
+  const numbersOnly = value
+    .replace("+62", "")
+    .replace(/\D/g, "");
+
+  setFormData((prev) => ({
+    ...prev,
+    company_phone: "+62" + numbersOnly,
+  }));
+};
+
+  const handlePhoneKeyDown = (e) => {
+  if (
+    formData.company_phone === "+62" &&
+    (e.key === "Backspace" || e.key === "Delete")
+  ) {
+    e.preventDefault();
+  }
+};
+
+const handleEmailChange = (value) => {
+  setFormData((prev) => ({
+    ...prev,
+    company_email: value,
+  }));
+
+  // Regex email standar
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!value) {
+    setEmailError("Email wajib diisi");
+  } else if (!emailRegex.test(value)) {
+    setEmailError("Format email tidak valid");
+  } else {
+    setEmailError("");
+  }
+};
+
+
   const handleChange = (key, value) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
@@ -160,6 +159,12 @@ data.append("city", formData.city || "");
 if (formData.logo instanceof File) {
   data.append("logo", formData.logo);
 }
+
+if (emailError || !formData.company_email) {
+  setEmailError("Email wajib diisi dan harus valid");
+  return;
+}
+
 
     // Logic dokumen (sesuaikan jika ada input file tambahan)
     const names = [];
@@ -191,31 +196,67 @@ if (formData.logo instanceof File) {
 
       <div className="bg-white rounded-b-lg p-8 flex flex-col gap-8 shadow-sm mb">
         {/* LOGO SECTION */}
-        <div className="flex gap-6 items-center">
-          <div className="w-24 h-24 rounded-full bg-[#F2F4F8] flex items-center justify-center overflow-hidden border">
-            {logoPreview ? (
-              <img src={logoPreview} alt="Logo" className="w-full h-full object-cover" />
-            ) : (
-              <img src={userIcon} alt="Default" className="w-12 h-12 opacity-30" />
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <button
-              type="button"
-              onClick={() => fileRef.current.click()}
-              className="border border-blue-600 text-blue-600 px-5 py-2 text-sm rounded hover:bg-blue-50 transition-colors"
-            >
-              Upload Photo
-            </button>
-            <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleLogoUpload} />
-          </div>
-        </div>
+<div className="flex gap-6 items-center">
+  <div className="w-24 h-24 rounded-full bg-[#F2F4F8] flex items-center justify-center overflow-hidden border">
+    {logoPreview ? (
+      <img
+        src={logoPreview}
+        alt="Logo"
+        className="w-full h-full object-cover"
+      />
+    ) : (
+      <img
+        src={userIcon}
+        alt="Default"
+        className="w-12 h-12 opacity-30"
+      />
+    )}
+  </div>
+
+  <div className="flex flex-col gap-2">
+    <button
+      type="button"
+      onClick={() => fileRef.current.click()}
+      className="border border-blue-600 text-blue-600 px-5 py-2 text-sm rounded hover:bg-blue-50 transition-colors"
+    >
+      Upload Photo
+    </button>
+
+    <input
+      ref={fileRef}
+      type="file"
+      accept="image/png,image/jpeg"
+      hidden
+      onChange={handleLogoUpload}
+    />
+
+    {/* KETERANGAN */}
+    <p className="text-xs text-gray-500">
+      Format JPG atau PNG • Maksimal 2MB
+    </p>
+  </div>
+</div>
+
 
         {/* FORM SECTION */}
         <div className="grid md:grid-cols-2 gap-6">
           <Input label="Nama Perusahaan" placeholder="PT Contoh" value={formData.company_name} onChange={(e) => handleChange("company_name", e.target.value)} />
-          <Input label="Email Perusahaan" placeholder="hrd@company.com" value={formData.company_email} onChange={(e) => handleChange("company_email", e.target.value)} />
-          <Input label="Nomor Telepon" placeholder="+62" value={formData.company_phone} onChange={(e) => handleChange("company_phone", e.target.value)} />
+          {/* <Input label="Email Perusahaan" placeholder="hrd@company.com" value={formData.company_email} onChange={(e) => handleChange(e.target.value)} /> */}
+
+          <div className="space-y-1">
+          <Input
+            label="Email Perusahaan"
+            placeholder="hrd@company.com"
+            value={formData.company_email}
+            onChange={(e) => handleEmailChange(e.target.value)}
+          />
+
+          {emailError && (
+            <p className="text-xs text-red-500">{emailError}</p>
+          )}
+          </div>
+
+          <Input label="Nomor Telepon" placeholder="+62" value={formData.company_phone} onChange={(e) => handlePhoneChange(e.target.value)} onKeyDown={handlePhoneKeyDown} />
           <Input label="Website" placeholder="https://company.com" value={formData.company_url} onChange={(e) => handleChange("company_url", e.target.value)} />
 
           <Select
@@ -303,5 +344,53 @@ if (formData.logo instanceof File) {
     </>
   );
 };
+
+/* ================= Reusable Components ================= */
+const Input = ({ label, placeholder, value, onChange, type = "text" }) => (
+  <div className="w-full">
+    <label className="text-[13px] font-medium text-gray-700">{label}</label>
+    <div className="flex items-center h-10.5 bg-[#F2F4F8] rounded-sm px-4 mt-1">
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={value || ""}
+        onChange={onChange}
+        className="w-full bg-transparent text-sm outline-none"
+      />
+    </div>
+  </div>
+);
+
+const Select = ({ label, placeholder, options = [], value, onChange, disabled }) => (
+  <div className="w-full">
+    <label className="text-[13px] font-medium text-gray-700">{label}</label>
+    <div className="flex items-center h-10.5 bg-[#F2F4F8] rounded-sm px-4 mt-1">
+      <select
+        value={value || ""}
+        onChange={onChange}
+        disabled={disabled}
+        className="w-full bg-transparent text-sm outline-none"
+      >
+        <option value="" disabled>{placeholder}</option>
+        {options.map((opt, i) => (
+          <option key={i} value={opt.value}>{opt.label}</option>
+        ))}
+      </select>
+    </div>
+  </div>
+);
+
+const Textarea = ({ label, placeholder, value, onChange }) => (
+  <div className="w-full">
+    <label className="text-[13px] font-medium text-gray-700">{label}</label>
+    <textarea
+      rows={4}
+      placeholder={placeholder}
+      value={value || ""}
+      onChange={onChange}
+      className="mt-1 w-full bg-[#F2F4F8] px-4 py-3 rounded-sm text-sm resize-none outline-none"
+    />
+  </div>
+);
 
 export default DataAum;

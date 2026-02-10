@@ -55,7 +55,7 @@ const HistoryJobs = () => {
             : "Ditinjau",
         pesan:
           item.hrd_notes ||
-          "Selamat! Lamaran Anda diterima. Silakan cek Email secara berkala.",
+          "Lamaran anda sedang di proses. Mohon cek Email secara berkala.",
       }));
 
       setDataLamaran(mapped);

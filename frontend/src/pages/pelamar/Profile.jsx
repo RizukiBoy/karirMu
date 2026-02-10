@@ -482,7 +482,6 @@ const isStep1AlreadyComplete = Boolean(profile) && step1Complete;
     }
   }}
 >
-  Selesai
 </button>
 
           </section>

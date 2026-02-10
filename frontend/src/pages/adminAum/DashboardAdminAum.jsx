@@ -126,7 +126,7 @@ const DashboardAdminAum = () => {
 
               <div className="pl-10">
                 <button 
-                  onClick={() => navigate("/admin-aum/profil")}
+                  onClick={() => navigate("/admin-aum/profile")}
                   className="border-2 border-blue-600 text-blue-600 px-6 py-2 rounded-md font-bold text-sm hover:bg-blue-600 hover:text-white transition-all duration-300"
                 >
                   Lengkapi Profil Anda Sekarang
@@ -169,7 +169,7 @@ const DashboardAdminAum = () => {
             className="text-white font-medium px-4 py-3 rounded-t-xl"
             style={{ background: "linear-gradient(90deg, #004F8F 0%, #009B49 100%)" }}
           >
-            Daftar Manajemen Pelamar
+            Daftar Manajemen Lowongan
           </div>
 
           <div className="bg-white overflow-x-auto rounded-b-xl border border-gray-200 shadow-sm">
@@ -212,7 +212,7 @@ const DashboardAdminAum = () => {
                             : "bg-red-100 text-red-600"
                         }`}
                       >
-                        {job.status === true || job.status === "true" ? "Aktif" : "Tutup"}
+                        {job.status === true || job.status === "true" ? "Aktif" : "Non-Aktif"}
                       </span>
 
                       </td>

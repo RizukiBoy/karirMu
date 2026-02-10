@@ -75,54 +75,96 @@ const DetailPengajuanAum = () => {
   const hasPendingDoc = documents.some((d) => d.status === "pending");
 const hasRejectedDoc = documents.some((d) => d.status === "rejected");
 
-const handleFinalDecision = async (finalStatus) => {
-  // finalStatus: "approved" atau "rejected"
-  const statusBoolean = finalStatus === "approved"; // true = approved, false = rejected
+// const handleFinalDecision = async (finalStatus) => {
+//   // finalStatus: "approved" atau "rejected"
+//   const statusBoolean = finalStatus === "approved"; // true = approved, false = rejected
 
-  // Validasi dokumen pending
-  if (statusBoolean && documents.some((d) => d.status === "pending")) {
-    return alert("Masih ada dokumen yang belum diverifikasi");
-  }
+//   // Validasi dokumen pending
+//   if (statusBoolean && documents.some((d) => d.status === "pending")) {
+//     return alert("Masih ada dokumen yang belum diverifikasi");
+//   }
 
-  // Validasi jika ada dokumen ditolak tapi catatan kosong
-  if (statusBoolean && documents.some((d) => d.status === "rejected") && !notes.trim()) {
-    return alert("Wajib isi catatan jika ada dokumen ditolak");
-  }
+//   // Validasi jika ada dokumen ditolak tapi catatan kosong
+//   if (statusBoolean && documents.some((d) => d.status === "rejected") && !notes.trim()) {
+//     return alert("Wajib isi catatan jika ada dokumen ditolak");
+//   }
 
-  if (
-    !window.confirm(
-      `Yakin ingin ${
-        statusBoolean ? "MENYETUJUI" : "MENOLAK"
-      } pengajuan AUM ini?`
+//   if (
+//     !window.confirm(
+//       `Yakin ingin ${
+//         statusBoolean ? "MENYETUJUI" : "MENOLAK"
+//       } pengajuan AUM ini?`
+//     )
+//   )
+//     return;
+
+//   try {
+//     setSubmitting(true);
+
+//     // PATCH ke endpoint verifyCompanyAccount
+//     await axios.patch(
+//       `http://localhost:5000/api/admin/${companyId}/verify-account`,
+//       {
+//         status: statusBoolean,
+//         notes: notes,
+//       },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//         },
+//       }
+//     );
+
+//     alert("Pengajuan berhasil diproses");
+//     navigate("/super-admin/pengajuan-aum");
+//   } catch (err) {
+//     alert(err.response?.data?.message || "Gagal memproses pengajuan");
+//   } finally {
+//     setSubmitting(false);
+//   }
+// };
+
+  const handleFinalDecision = async () => {
+    const isAllApproved =
+      documents.length === 4 &&
+      documents.every((d) => d.status === "approved");
+
+    // jika ada dokumen rejected → catatan wajib
+    if (!isAllApproved && documents.some((d) => d.status === "rejected") && !notes.trim()) {
+      return alert("Wajib isi catatan jika ada dokumen ditolak");
+    }
+
+    if (
+      !window.confirm(
+        "Yakin ingin menyimpan hasil verifikasi pengajuan AUM ini?"
+      )
     )
-  )
-    return;
+      return;
 
-  try {
-    setSubmitting(true);
+    try {
+      setSubmitting(true);
 
-    // PATCH ke endpoint verifyCompanyAccount
-    await axios.patch(
-      `http://localhost:5000/api/admin/${companyId}/verify-account`,
-      {
-        status: statusBoolean,
-        notes: notes,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      await axios.patch(
+        `http://localhost:5000/api/admin/${companyId}/verify-account`,
+        {
+          status: isAllApproved, // ⬅️ otomatis
+          notes: notes,
         },
-      }
-    );
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    alert("Pengajuan berhasil diproses");
-    navigate("/super-admin/pengajuan-aum");
-  } catch (err) {
-    alert(err.response?.data?.message || "Gagal memproses pengajuan");
-  } finally {
-    setSubmitting(false);
-  }
-};
+      alert("Pengajuan berhasil disimpan");
+      navigate("/super-admin/pengajuan-aum");
+    } catch (err) {
+      alert(err.response?.data?.message || "Gagal menyimpan pengajuan");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
 
 
@@ -229,7 +271,7 @@ const handleFinalDecision = async (finalStatus) => {
           Aksi
         </div>
 
-<div className="bg-white rounded-b-xl shadow p-4 flex justify-end gap-3">
+{/* <div className="bg-white rounded-b-xl shadow p-4 flex justify-end gap-3">
   <button
     disabled={submitting}
     onClick={() => handleFinalDecision("rejected")}
@@ -244,6 +286,23 @@ const handleFinalDecision = async (finalStatus) => {
     className="px-6 py-2 rounded-lg bg-green-600 text-white text-sm font-medium"
   >
     Setujui & Aktifkan
+  </button>
+</div> */}
+
+<div className="bg-white rounded-b-xl shadow p-4 flex justify-end gap-3">
+  <button
+    onClick={() => navigate(-1)}
+    className="px-6 py-2 rounded-lg bg-gray-500 text-white text-sm font-medium"
+  >
+    Kembali
+  </button>
+
+  <button
+    disabled={submitting}
+    onClick={handleFinalDecision}
+    className="px-6 py-2 rounded-lg bg-green-600 text-white text-sm font-medium"
+  >
+    Simpan
   </button>
 </div>
 

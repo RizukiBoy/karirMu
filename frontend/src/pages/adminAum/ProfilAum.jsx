@@ -12,7 +12,7 @@ const ProfilAum = () => {
   const [formData, setFormData] = useState({
     company_name: "",
     company_email: "",
-    company_phone: "",
+    company_phone: "+62",
     company_url: "",
     province: "",
     city: "",
