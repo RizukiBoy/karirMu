@@ -49,6 +49,15 @@ const PublicJobDetail = () => {
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [openApply, setOpenApply] = useState(false);
+  const [profileComplete, setProfileComplete] = useState(false);
+  const [openProfileGuard, setOpenProfileGuard] = useState(false);
+
+
+  const authHeader = {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    },
+  };
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -58,7 +67,6 @@ const PublicJobDetail = () => {
         );
 
         const data = res.data.data
-        console.log(data)
         setJob(data || null);
       } catch (error) {
         console.error("Gagal mengambil detail job:", error);
@@ -69,6 +77,37 @@ const PublicJobDetail = () => {
 
     fetchDetail();
   }, [jobId]);
+
+  useEffect(() => {
+  const checkProfile = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/user/profile",
+        authHeader
+      );
+
+      const profile = res.data;
+
+      // LOGIKA PROFIL LENGKAP
+      const isComplete =
+        profile?.headline &&
+        profile?.about_me &&
+        profile?.address &&
+        profile?.location &&
+        profile?.age &&
+        profile?.gender &&
+        profile?.whatsapp &&
+        profile?.photo;
+
+      setProfileComplete(!!isComplete);
+    } catch (err) {
+      setProfileComplete(false);
+    }
+  };
+
+  checkProfile();
+}, []);
+
 
   if (loading) {
     return (
@@ -169,12 +208,56 @@ const PublicJobDetail = () => {
 
           <div className="flex items-center gap-5">
             <Share size="20" className="text-gray-600 cursor-pointer" />
-      <button
-        onClick={() => setOpenApply(true)}
-        className="px-6 py-2 bg-green-600 text-white rounded-lg"
-      >
-        Lamar
-      </button>
+<button
+  onClick={() => {
+    if (!profileComplete) {
+      setOpenProfileGuard(true);
+    } else {
+      setOpenApply(true);
+    }
+  }}
+  className="px-6 py-2 bg-green-600 text-white rounded-lg"
+>
+  Lamar
+</button>
+
+{openProfileGuard && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-xl p-6 max-w-md w-full text-center space-y-4">
+      <img
+        src={iconCheckCirclePelamar}
+        alt="warning"
+        className="w-16 mx-auto"
+      />
+
+      <h3 className="text-lg font-semibold">
+        Profil Belum Lengkap
+      </h3>
+
+      <p className="text-sm text-gray-600">
+        Silakan lengkapi profil Anda terlebih dahulu sebelum
+        melamar pekerjaan.
+      </p>
+
+      <div className="flex gap-3 justify-center pt-4">
+        <button
+          onClick={() => setOpenProfileGuard(false)}
+          className="px-4 py-2 border rounded-lg"
+        >
+          Nanti
+        </button>
+
+        <button
+          onClick={() => navigate("/pelamar/profile")}
+          className="px-4 py-2 bg-green-600 text-white rounded-lg"
+        >
+          Lengkapi Profil
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
       <ApplyJobModal
         isOpen={openApply}
@@ -185,6 +268,8 @@ const PublicJobDetail = () => {
         </div>
       </div>
     </PelamarLayout>
+
+
   );
 };
 

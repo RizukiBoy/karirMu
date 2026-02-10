@@ -31,6 +31,8 @@ const DetailPengajuanAum = () => {
 
       setCompany(res.data.company);
       setDocuments(res.data.documents || []);
+
+      setNotes(res.data.company?.notes || [])
     } catch (err) {
       console.error(err);
       alert("Gagal mengambil detail AUM");

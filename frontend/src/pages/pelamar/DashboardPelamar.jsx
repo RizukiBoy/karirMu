@@ -224,6 +224,19 @@ const DashboardPelamar = () => {
   </div>
 </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {loading && (
+        <p className="text-sm text-gray-500">
+            Memuat lowongan...
+        </p>
+        )}
+
+        {!loading && jobs.length === 0 && (
+        <p className="text-sm text-gray-500">
+            Lowongan tidak ditemukan
+        </p>
+        )}
+
         {!loading &&
         jobs.map((job) => (
             <PublicJobCard
@@ -233,7 +246,7 @@ const DashboardPelamar = () => {
                 navigate(`/jobs/${job._id}`)}
             />
         ))}
-
+        </div>
       </div>
     </PelamarLayout>
   );

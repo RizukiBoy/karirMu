@@ -267,6 +267,8 @@ const refreshDocument = async () => {
     }
   }
 };
+
+
 const refreshEducation = async () => {
   try {
     const res = await axios.get(
@@ -278,11 +280,10 @@ const refreshEducation = async () => {
       }
     );
 
-    // WAJIB array
-    setEducation(Array.isArray(res.data.data) ? res.data.data : []);
+    setEducation(res.data.data);
+    onSUccess();
   } catch (err) {
     if (err.response?.status === 404) {
-      // belum ada data pendidikan
       setEducation([]);
     } else {
       console.error("Gagal refresh education:", err);
@@ -425,7 +426,7 @@ const isStep1AlreadyComplete = Boolean(profile) && step1Complete;
               <EducationSection education={education} />
 
               {/* FORM */}
-              <EducationForm onSuccess={loadEducation} />
+              <EducationForm onSuccess={refreshEducation} />
 
               {/* ACTION */}
               {!step2Submitted && (

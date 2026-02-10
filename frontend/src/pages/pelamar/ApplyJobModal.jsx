@@ -14,6 +14,7 @@ const ApplyJobModal = ({ isOpen, onClose, jobId }) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [openCVModal, setOpenCVModal] = useState(false);
+  const [alreadyApplied, setAlreadyApplied] = useState(false);
 
   const isSubmittingRef = useRef(false);
 
@@ -79,7 +80,7 @@ const handleViewCV = () => {
         setShowSuccessModal(true);
       } catch (error) {
         if (error.response?.status === 409) {
-          // already applied → treat as success
+          setAlreadyApplied(true);
           setShowApplyModal(false);
           setShowSuccessModal(true);
         } else {
@@ -123,26 +124,10 @@ const handleViewCV = () => {
             {/* CV INFO */}
           <div className="border rounded-lg p-4 bg-gray-50 mb-6">
             {cvUrl ? (
-              <div className="flex justify-between items-center">
-                <span className="text-green-700 font-medium text-sm">
+              <div className="flex justify-center items-center">
+                <span onClick={handleViewCV} className="text-green-700 font-medium text-sm underline">
                   CV sudah terunggah
                 </span>
-
-                <div className="flex gap-4">
-                  <button
-                    onClick={handleViewCV}
-                    className="text-gray-700 text-sm font-bold hover:underline"
-                  >
-                    Lihat CV
-                  </button>
-
-                  <button
-                    onClick={() => setOpenCVModal(true)}
-                    className="text-blue-600 text-sm font-bold hover:underline"
-                  >
-                    Ganti CV
-                  </button>
-                </div>
               </div>
             ) : (
               <p className="text-red-600 text-sm">
@@ -181,6 +166,7 @@ const handleViewCV = () => {
             setOpenCVModal(false);
           }}
         />
+
     {showApplyModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-xl max-w-lg w-full overflow-hidden">
@@ -189,6 +175,12 @@ const handleViewCV = () => {
                 Lamar Posisi {job.job_name}
               </h2>
             </div>
+
+                    {alreadyApplied && (
+          <div className="text-center p-4 bg-red-100 text-red-700 rounded-lg text-sm mt-4">
+           Anda sudah melamar lowongan ini sebelumnya.
+          </div>
+        )}
 
             <div className="p-8 space-y-6">
               <p className="text-gray-600 text-sm">
@@ -231,15 +223,29 @@ const handleViewCV = () => {
 
               <button
                 onClick={handleApply}
-                disabled={submitting}
-                className="px-10 py-3 bg-[#43934B] text-white font-bold rounded-xl shadow-lg disabled:opacity-60"
+                disabled={submitting || alreadyApplied}
+                className={`px-10 py-3 font-bold rounded-xl shadow-lg
+                  ${
+                    alreadyApplied
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-[#43934B] text-white"
+                  }
+                  disabled:opacity-60
+                `}
               >
-                {submitting ? "Mengirim..." : "Kirim Lamaran"}
+                {alreadyApplied
+                  ? "Sudah Melamar"
+                  : submitting
+                  ? "Mengirim..."
+                  : "Kirim Lamaran"}
               </button>
+
             </div>
           </div>
         </div>
       )}
+
+
 
         {/* SUCCESS MODAL */}
 {showSuccessModal && (

@@ -58,8 +58,6 @@ export default function EducationForm({ onSuccess }) {
         graduate_status: "belum_lulus",
         graduate: "",
       });
-
-      onSuccess(); // refresh parent
     } finally {
       setLoading(false);
     }

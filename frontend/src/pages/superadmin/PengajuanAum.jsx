@@ -84,6 +84,57 @@ const filters = [
     return `${verification.approved_count} / ${verification.total_documents} dokumen`;
   };
 
+  const getDocumentCount = (verification) => {
+  if (!verification) {
+    return {
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+    };
+  }
+
+  // 🔹 Jika backend kirim count langsung
+  if (
+    verification.total_documents !== undefined &&
+    verification.approved_count !== undefined
+  ) {
+    const approved = verification.approved_count || 0;
+    const rejected = verification.rejected_count || 0;
+    const pending =
+      verification.total_documents - approved - rejected;
+
+    return {
+      pending: Math.max(pending, 0),
+      approved,
+      rejected,
+    };
+  }
+
+  // 🔹 Jika backend kirim array dokumen
+  if (Array.isArray(verification.documents)) {
+    const approved = verification.documents.filter(
+      (d) => d.status === "approved"
+    ).length;
+
+    const rejected = verification.documents.filter(
+      (d) => d.status === "rejected"
+    ).length;
+
+    const pending = verification.documents.filter(
+      (d) => d.status === "pending"
+    ).length;
+
+    return { pending, approved, rejected };
+  }
+
+  return {
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+  };
+};
+
+
   if (loading) {
     return (
       <AdminSuperLayout>
@@ -159,6 +210,7 @@ const filters = [
         ) : (
           filteredData.map((item) => {
             const statusUI = getStatusUI(item.verification);
+            const docCount = getDocumentCount(item.verification);
 
             return (
               <div
@@ -203,12 +255,44 @@ const filters = [
                   <span
                     className={`flex px-3 py-1 text-xs rounded-full text-white ${statusUI.class}`}
                   >
-                    <p className="mr-4">
 
-                    {statusUI.label}
-                    </p>
+                  <div className="space-y-2 text-sm">
+                    {/* SEMUA DITERIMA */}
+                    {docCount.pending === 0 &&
+                      docCount.rejected === 0 &&
+                      docCount.approved > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-white font-medium">Di terima</span>
+                          <span className="font-medium text-white ml-2">
+                            {docCount.approved}
+                          </span>
+                        </div>
+                      )}
 
-                    {item.verification.approved_count}
+                    {/* ADA YANG DITOLAK */}
+                    {docCount.rejected > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-white font-medium">Di tolak</span>
+                        <span className="font-medium text-white ml-2">
+                          {docCount.rejected}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* BELUM ADA PROSES */}
+                    {docCount.approved === 0 &&
+                      docCount.rejected === 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-white font-medium">Menunggu</span>
+                          <span className="font-medium text-white ml-2">
+                            {docCount.pending}
+                          </span>
+                        </div>
+                      )}
+                  </div>
+
+
+
 
                   </span>
                 </div>

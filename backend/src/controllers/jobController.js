@@ -245,7 +245,6 @@ exports.activateJobs = async (req, res) => {
   }
 };
 
-
 exports.getPublicJobs = async (req, res) => {
   try {
     const {
