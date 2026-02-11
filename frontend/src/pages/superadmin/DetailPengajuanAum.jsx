@@ -17,6 +17,9 @@ const DetailPengajuanAum = () => {
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
+  const [industries, setIndustries] = useState([]);
+  const [error, setError] = useState(null);
+
 
   const fetchDetail = async () => {
     try {
@@ -33,6 +36,7 @@ const DetailPengajuanAum = () => {
       setDocuments(res.data.documents || []);
 
       setNotes(res.data.company?.notes || [])
+      console.log(res.data.company)
     } catch (err) {
       console.error(err);
       alert("Gagal mengambil detail AUM");
@@ -66,8 +70,23 @@ const DetailPengajuanAum = () => {
     }
   };
 
+  const fetchIndustries = async () => {
+  try {
+    const res = await axios.get("http://localhost:5000/api/industries");
+    setIndustries(res.data.data);
+  } catch (err) {
+    setError("Gagal mengambil industries");
+  }
+};
+const getIndustryName = (industryId) => {
+  const industry = industries.find((i) => i._id === industryId);
+  return industry?.name || "-";
+};
+
+
   useEffect(() => {
     fetchDetail();
+    fetchIndustries();
   }, []);
 
   if (loading) return <p className="text-sm text-gray-500">Loading...</p>;
@@ -191,7 +210,7 @@ const hasRejectedDoc = documents.some((d) => d.status === "rejected");
             <Info label="Nama Perusahaan" value={company.company_name} />
             <Info label="No Telepon" value={company.company_phone} />
             <Info label="Provinsi" value={company.province} />
-            <Info label="Bidang Industri" value={company.industry} />
+            <Info label="Bidang Industri" value={getIndustryName(company.industry_id)} />
           </div>
 
           <div className="bg-white rounded-b-xl shadow p-6 space-y-3 text-sm">

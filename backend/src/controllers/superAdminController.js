@@ -307,34 +307,54 @@ exports.verifyCompanyAccount = async (req, res) => {
   }
 };
 
-
 exports.getAdminAumDetail = async (req, res) => {
   try {
     const { companyId } = req.params;
-
     const companyObjectId = new ObjectId(companyId);
 
-    const company = await companies.findOne({ _id: companyObjectId });
-    if (!company) {
+    const companyAgg = await companies
+      .aggregate([
+        {
+          $match: { _id: companyObjectId },
+        },
+        {
+          $lookup: {
+            from: "industries",           // nama collection
+            localField: "industry",       // field di companies
+            foreignField: "_id",           // field di industries
+            as: "industry",
+          },
+        },
+        {
+          $unwind: {
+            path: "$industry",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+      ])
+      .toArray();
+
+    if (!companyAgg.length) {
       return res.status(404).json({ message: "Company tidak ditemukan" });
     }
 
+    const company = companyAgg[0];
+
     const documents = await companyDocuments
       .find({ company_id: companyObjectId })
-      .sort({ created_at: -1 })
+      .sort({ created_at: cd-1 })
       .toArray();
 
-    if (!documents || documents.length === 0) {
-      return res.status(404).json({ message: "Tidak ada dokumen untuk company ini" });
-    }
-
-
-    return res.status(200).json({ company, documents });
+    return res.status(200).json({
+      company,
+      documents,
+    });
   } catch (error) {
     console.error("ERROR getAdminAumDetail:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 exports.getAdminDashboardSummary = async (req, res) => {
   try {

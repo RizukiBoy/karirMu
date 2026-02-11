@@ -17,6 +17,14 @@ const DetailProfilAum = () => {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(true);
+  const EMPLOYEE_RANGE_LABEL = {
+  11: "1–10 Karyawan",
+  12: "11–50 Karyawan",
+  13: "51–200 Karyawan",
+  14: "201–500 Karyawan",
+  15: "500+ Karyawan",
+};
+
 
   // ===== EDIT STATE =====
   const [showEditModal, setShowEditModal] = useState(false);
@@ -67,6 +75,8 @@ const fetchCompanyProfile = async () => {
     setLoading(false);
   }
 };
+
+
 
 
   if (loading) return <p className="text-center py-6">Loading...</p>;
@@ -152,7 +162,7 @@ const fetchCompanyProfile = async () => {
               <Row label="Email" value={company.company_email} />
               <Row label="Website" value={company.company_url} />
               <Row label="Kota" value={company.city} />
-              <Row label="Jumlah Karyawan" value={company.employee_range} />
+              <Row label="Jumlah Karyawan" value={EMPLOYEE_RANGE_LABEL[company.employee_range]} />
             </Card>
           </div>
 
